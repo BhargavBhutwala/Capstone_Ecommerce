@@ -1,0 +1,1575 @@
+openapi: 3.0.3
+info:
+  title: E-Bookstore API
+  version: 1.0.0
+  description: |
+    REST API contract for the AI Specialist Capstone E-Bookstore platform.
+
+    Scope is derived from the capstone wireframes, customer journeys,
+    architecture, and manually prepared data model. The contract covers
+    the core purchase journey first, with supporting capabilities for
+    order history, buy-again, gift points, coupons, shipping, returns,
+    and refunds.
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local development
+
+tags:
+  - name: Authentication
+  - name: Users
+  - name: Categories
+  - name: Brands
+  - name: Products
+  - name: Cart
+  - name: Addresses
+  - name: Orders
+  - name: Payments
+  - name: Shipments
+  - name: Gift Points
+  - name: Coupons
+  - name: Returns
+
+security:
+  - bearerAuth: []
+
+paths:
+
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a customer account
+      security: []
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate a customer
+      security: []
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Log out the current user
+      operationId: logout
+      responses:
+        '204':
+          description: Logout successful
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get the current authenticated user
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /categories:
+    get:
+      tags: [Categories]
+      summary: List active categories
+      security: []
+      operationId: listCategories
+      responses:
+        '200':
+          description: Category list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategorySummary'
+
+  /categories/{categoryId}/products:
+    get:
+      tags: [Categories]
+      summary: List products in a category
+      security: []
+      operationId: getProductsByCategory
+      parameters:
+        - $ref: '#/components/parameters/CategoryId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+      responses:
+        '200':
+          $ref: '#/components/responses/PagedProductResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /brands:
+    get:
+      tags: [Brands]
+      summary: List active brands
+      security: []
+      operationId: listBrands
+      responses:
+        '200':
+          description: Brand list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BrandSummary'
+
+  /brands/{brandId}/products:
+    get:
+      tags: [Brands]
+      summary: List products for a brand
+      security: []
+      operationId: getProductsByBrand
+      parameters:
+        - $ref: '#/components/parameters/BrandId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+      responses:
+        '200':
+          $ref: '#/components/responses/PagedProductResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /products:
+    get:
+      tags: [Products]
+      summary: Browse and search products
+      security: []
+      operationId: searchProducts
+      parameters:
+        - name: q
+          in: query
+          description: Text search term for product title/description.
+          schema:
+            type: string
+            maxLength: 255
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: brandId
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+            format: double
+            minimum: 0
+        - name: availableOnly
+          in: query
+          schema:
+            type: boolean
+            default: true
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - $ref: '#/components/parameters/Sort'
+      responses:
+        '200':
+          $ref: '#/components/responses/PagedProductResponse'
+
+  /products/{productId}:
+    get:
+      tags: [Products]
+      summary: Get product details
+      security: []
+      operationId: getProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /products/{productId}/related:
+    get:
+      tags: [Products]
+      summary: Get related products
+      security: []
+      operationId: getRelatedProducts
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          description: Related products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductSummary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /addresses:
+    get:
+      tags: [Addresses]
+      summary: List the current user's addresses
+      operationId: listAddresses
+      responses:
+        '200':
+          description: Address list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddressResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Addresses]
+      summary: Create a delivery address
+      operationId: createAddress
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+      responses:
+        '201':
+          description: Address created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /addresses/{addressId}:
+    put:
+      tags: [Addresses]
+      summary: Update a delivery address
+      operationId: updateAddress
+      parameters:
+        - $ref: '#/components/parameters/AddressId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+      responses:
+        '200':
+          description: Address updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Addresses]
+      summary: Delete a delivery address
+      operationId: deleteAddress
+      parameters:
+        - $ref: '#/components/parameters/AddressId'
+      responses:
+        '204':
+          description: Address deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /cart:
+    get:
+      tags: [Cart]
+      summary: Get the current user's active cart
+      operationId: getCart
+      responses:
+        '200':
+          description: Active cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /cart/items:
+    post:
+      tags: [Cart]
+      summary: Add a product to the active cart
+      operationId: addCartItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCartItemRequest'
+      responses:
+        '201':
+          description: Cart item added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Requested quantity is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /cart/items/{itemId}:
+    put:
+      tags: [Cart]
+      summary: Update cart item quantity
+      operationId: updateCartItem
+      parameters:
+        - $ref: '#/components/parameters/CartItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartItemRequest'
+      responses:
+        '200':
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Requested quantity is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [Cart]
+      summary: Remove an item from the active cart
+      operationId: removeCartItem
+      parameters:
+        - $ref: '#/components/parameters/CartItemId'
+      responses:
+        '204':
+          description: Cart item removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders:
+    get:
+      tags: [Orders]
+      summary: Get the current user's order history
+      operationId: listOrders
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/OrderStatus'
+      responses:
+        '200':
+          $ref: '#/components/responses/PagedOrderResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Orders]
+      summary: Create an order from the active cart
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Cart is empty or product availability changed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{orderId}:
+    get:
+      tags: [Orders]
+      summary: Get an order
+      operationId: getOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders/{orderId}/buy-again:
+    post:
+      tags: [Orders]
+      summary: Add products from a previous order back to the active cart
+      operationId: buyAgain
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Updated active cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: One or more products are no longer available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /orders/{orderId}/cancel:
+    post:
+      tags: [Orders]
+      summary: Cancel an eligible order
+      operationId: cancelOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Order cannot be cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments:
+    post:
+      tags: [Payments]
+      summary: Initiate payment for an order
+      operationId: initiatePayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentRequest'
+      responses:
+        '201':
+          description: Payment initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Payment cannot be initiated for the order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/{paymentId}:
+    get:
+      tags: [Payments]
+      summary: Get payment status
+      operationId: getPayment
+      parameters:
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '200':
+          description: Payment status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /shipments/{shipmentId}:
+    get:
+      tags: [Shipments]
+      summary: Get shipment information
+      operationId: getShipment
+      parameters:
+        - $ref: '#/components/parameters/ShipmentId'
+      responses:
+        '200':
+          description: Shipment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /gift-points:
+    get:
+      tags: [Gift Points]
+      summary: Get the current user's gift point balance
+      operationId: getGiftPointAccount
+      responses:
+        '200':
+          description: Gift point account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GiftPointAccountResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /gift-points/transactions:
+    get:
+      tags: [Gift Points]
+      summary: Get gift point transaction history
+      operationId: listGiftPointTransactions
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Size'
+      responses:
+        '200':
+          $ref: '#/components/responses/PagedGiftPointTransactionResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /coupons/{code}:
+    get:
+      tags: [Coupons]
+      summary: Validate a coupon code
+      operationId: validateCoupon
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
+      responses:
+        '200':
+          description: Coupon is valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouponValidationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Coupon is inactive or not currently valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /returns:
+    post:
+      tags: [Returns]
+      summary: Request a return for an order
+      operationId: createReturnRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReturnRequest'
+      responses:
+        '201':
+          description: Return request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReturnRequestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Order is not eligible for return
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /returns/{returnId}:
+    get:
+      tags: [Returns]
+      summary: Get return request status
+      operationId: getReturnRequest
+      parameters:
+        - $ref: '#/components/parameters/ReturnId'
+      responses:
+        '200':
+          description: Return request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReturnRequestResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+
+    CategoryId:
+      name: categoryId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+
+    BrandId:
+      name: brandId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+
+    AddressId:
+      name: addressId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+
+    CartItemId:
+      name: itemId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+
+    PaymentId:
+      name: paymentId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+
+    ShipmentId:
+      name: shipmentId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+
+    ReturnId:
+      name: returnId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+    Size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    Sort:
+      name: sort
+      in: query
+      description: Spring-style sort expression, for example title,asc.
+      schema:
+        type: string
+        default: title,asc
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Authentication is required or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Requested resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    PagedProductResponse:
+      description: Product page
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagedProductResponse'
+
+    PagedOrderResponse:
+      description: Order page
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagedOrderResponse'
+
+    PagedGiftPointTransactionResponse:
+      description: Gift point transaction page
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PagedGiftPointTransactionResponse'
+
+  schemas:
+
+    RegisterRequest:
+      type: object
+      required: [firstName, lastName, email, password]
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 100
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      required: [accessToken, tokenType, user]
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          format: int64
+          description: Token lifetime in seconds.
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    UserResponse:
+      type: object
+      required: [id, firstName, lastName, email, role, status]
+      properties:
+        id:
+          type: integer
+          format: int64
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          $ref: '#/components/schemas/UserStatus'
+        createdAt:
+          type: string
+          format: date-time
+
+    CategorySummary:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        active:
+          type: boolean
+
+    BrandSummary:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        active:
+          type: boolean
+
+    ProductSummary:
+      type: object
+      required: [id, title, price, available]
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        isbn:
+          type: string
+        price:
+          type: number
+          format: double
+          minimum: 0
+        available:
+          type: boolean
+        stockQuantity:
+          type: integer
+          minimum: 0
+
+    ProductResponse:
+      allOf:
+        - $ref: '#/components/schemas/ProductSummary'
+        - type: object
+          properties:
+            description:
+              type: string
+            category:
+              $ref: '#/components/schemas/CategorySummary'
+            brand:
+              $ref: '#/components/schemas/BrandSummary'
+            deliveryEstimate:
+              $ref: '#/components/schemas/DeliveryEstimate'
+
+    DeliveryEstimate:
+      type: object
+      required: [minDays, maxDays]
+      properties:
+        minDays:
+          type: integer
+          minimum: 0
+        maxDays:
+          type: integer
+          minimum: 0
+
+    AddressRequest:
+      type: object
+      required:
+        - addressLine1
+        - city
+        - state
+        - postalCode
+        - country
+      properties:
+        label:
+          type: string
+          maxLength: 50
+        addressLine1:
+          type: string
+          minLength: 1
+          maxLength: 255
+        addressLine2:
+          type: string
+          maxLength: 255
+        city:
+          type: string
+          minLength: 1
+          maxLength: 100
+        state:
+          type: string
+          minLength: 1
+          maxLength: 100
+        postalCode:
+          type: string
+          minLength: 3
+          maxLength: 20
+        country:
+          type: string
+          minLength: 2
+          maxLength: 100
+        isDefault:
+          type: boolean
+          default: false
+
+    AddressResponse:
+      allOf:
+        - $ref: '#/components/schemas/AddressRequest'
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: integer
+              format: int64
+
+    AddCartItemRequest:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId:
+          type: integer
+          format: int64
+          minimum: 1
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 999
+
+    UpdateCartItemRequest:
+      type: object
+      required: [quantity]
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 999
+
+    CartItemResponse:
+      type: object
+      required: [id, product, quantity, unitPrice, subtotal]
+      properties:
+        id:
+          type: integer
+          format: int64
+        product:
+          $ref: '#/components/schemas/ProductSummary'
+        quantity:
+          type: integer
+          minimum: 1
+        unitPrice:
+          type: number
+          format: double
+          minimum: 0
+        subtotal:
+          type: number
+          format: double
+          minimum: 0
+
+    CartResponse:
+      type: object
+      required: [id, status, items, subtotal, totalAmount]
+      properties:
+        id:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/CartStatus'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItemResponse'
+        subtotal:
+          type: number
+          format: double
+          minimum: 0
+        recommendedProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        totalAmount:
+          type: number
+          format: double
+          minimum: 0
+
+    CreateOrderRequest:
+      type: object
+      required: [addressId]
+      properties:
+        addressId:
+          type: integer
+          format: int64
+          minimum: 1
+        couponCode:
+          type: string
+          maxLength: 50
+        giftPointsToRedeem:
+          type: integer
+          minimum: 0
+
+    OrderItemResponse:
+      type: object
+      required: [id, productId, productTitle, quantity, unitPrice, subtotal]
+      properties:
+        id:
+          type: integer
+          format: int64
+        productId:
+          type: integer
+          format: int64
+        productTitle:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        unitPrice:
+          type: number
+          format: double
+          minimum: 0
+        subtotal:
+          type: number
+          format: double
+          minimum: 0
+
+    ShippingAddressSnapshot:
+      type: object
+      required:
+        - name
+        - addressLine1
+        - city
+        - state
+        - postalCode
+        - country
+      properties:
+        name:
+          type: string
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+
+    OrderResponse:
+      type: object
+      required:
+        - id
+        - orderNumber
+        - status
+        - items
+        - subtotal
+        - totalAmount
+      properties:
+        id:
+          type: integer
+          format: int64
+        orderNumber:
+          type: string
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemResponse'
+        shippingAddress:
+          $ref: '#/components/schemas/ShippingAddressSnapshot'
+        subtotal:
+          type: number
+          format: double
+          minimum: 0
+        shippingAmount:
+          type: number
+          format: double
+          minimum: 0
+        discountAmount:
+          type: number
+          format: double
+          minimum: 0
+        giftPointsUsed:
+          type: integer
+          minimum: 0
+        totalAmount:
+          type: number
+          format: double
+          minimum: 0
+        placedAt:
+          type: string
+          format: date-time
+        cancellationDeadline:
+          type: string
+          format: date-time
+          nullable: true
+
+    CreatePaymentRequest:
+      type: object
+      required: [orderId, paymentMethod]
+      properties:
+        orderId:
+          type: integer
+          format: int64
+          minimum: 1
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethod'
+
+    PaymentResponse:
+      type: object
+      required: [id, orderId, paymentReference, paymentMethod, amount, status]
+      properties:
+        id:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+        paymentReference:
+          type: string
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethod'
+        amount:
+          type: number
+          format: double
+          minimum: 0
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    ShipmentResponse:
+      type: object
+      required: [id, orderId, status]
+      properties:
+        id:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+        shippingMethod:
+          type: string
+        shippingCost:
+          type: number
+          format: double
+          minimum: 0
+        estimatedFrom:
+          type: string
+          format: date
+        estimatedTo:
+          type: string
+          format: date
+        trackingNumber:
+          type: string
+        status:
+          $ref: '#/components/schemas/ShipmentStatus'
+        shippedAt:
+          type: string
+          format: date-time
+          nullable: true
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    GiftPointAccountResponse:
+      type: object
+      required: [id, balance]
+      properties:
+        id:
+          type: integer
+          format: int64
+        balance:
+          type: integer
+          minimum: 0
+
+    GiftPointTransactionResponse:
+      type: object
+      required: [id, type, points, createdAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+          nullable: true
+        type:
+          $ref: '#/components/schemas/GiftPointTransactionType'
+        points:
+          type: integer
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    CouponValidationResponse:
+      type: object
+      required: [code, valid]
+      properties:
+        code:
+          type: string
+        valid:
+          type: boolean
+        discountType:
+          type: string
+          enum: [PERCENTAGE, FIXED_AMOUNT]
+        discountValue:
+          type: number
+          format: double
+          minimum: 0
+        minimumOrderValue:
+          type: number
+          format: double
+          minimum: 0
+        maxDiscount:
+          type: number
+          format: double
+          minimum: 0
+          nullable: true
+
+    CreateReturnRequest:
+      type: object
+      required: [orderId, reason]
+      properties:
+        orderId:
+          type: integer
+          format: int64
+          minimum: 1
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 255
+
+    ReturnRequestResponse:
+      type: object
+      required: [id, orderId, reason, status, requestedAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        status:
+          $ref: '#/components/schemas/ReturnStatus'
+        requestedAt:
+          type: string
+          format: date-time
+        approvedAt:
+          type: string
+          format: date-time
+          nullable: true
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      required: [timestamp, status, code, message, path]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        code:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        fieldErrors:
+          type: object
+          additionalProperties:
+            type: string
+
+    PageMetadata:
+      type: object
+      required: [page, size, totalElements, totalPages]
+      properties:
+        page:
+          type: integer
+          minimum: 0
+        size:
+          type: integer
+          minimum: 1
+        totalElements:
+          type: integer
+          format: int64
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+
+    PagedProductResponse:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSummary'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+
+    PagedOrderResponse:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+
+    PagedGiftPointTransactionResponse:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/GiftPointTransactionResponse'
+        page:
+          $ref: '#/components/schemas/PageMetadata'
+
+    UserRole:
+      type: string
+      enum:
+        - CUSTOMER
+        - ADMIN
+
+    UserStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+        - LOCKED
+
+    CartStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - CHECKED_OUT
+        - ABANDONED
+
+    OrderStatus:
+      type: string
+      enum:
+        - PENDING_PAYMENT
+        - PAID
+        - CONFIRMED
+        - SHIPPED
+        - DELIVERED
+        - CANCELLED
+        - RETURN_REQUESTED
+        - RETURNED
+        - REFUNDED
+
+    PaymentMethod:
+      type: string
+      enum:
+        - CREDIT_CARD
+        - DEBIT_CARD
+
+    PaymentStatus:
+      type: string
+      enum:
+        - INITIATED
+        - PROCESSING
+        - SUCCESS
+        - FAILED
+        - REFUNDED
+
+    ShipmentStatus:
+      type: string
+      enum:
+        - PENDING
+        - SHIPPED
+        - IN_TRANSIT
+        - DELIVERED
+        - RETURNED
+
+    GiftPointTransactionType:
+      type: string
+      enum:
+        - EARNED
+        - REDEEMED
+        - EXPIRED
+        - ADJUSTED
+
+    ReturnStatus:
+      type: string
+      enum:
+        - REQUESTED
+        - APPROVED
+        - REJECTED
+        - COMPLETED
