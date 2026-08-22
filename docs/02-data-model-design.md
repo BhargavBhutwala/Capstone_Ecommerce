@@ -12,7 +12,7 @@
 
 This document defines the proposed relational data model for the E-Bookstore capstone project.
 
-The capstone instructs the developer to analyze the supplied wireframes, identify entities such as **Product, User, Order**, and prepare the data model manually before generating the OpenAPI specification and AI-assisted Spring Boot backend. The specified database technology is **PostgreSQL**. [Source: Capstone instructions, Technology Components and Workflow; Step 1 and Step 3.] 
+The capstone instructs the developer to analyze the supplied wireframes, identify entities such as **Product, User, Order**, and prepare the data model manually before generating the OpenAPI specification and AI-assisted Spring Boot backend. The specified database technology is **PostgreSQL**.
 
 This document is therefore the database design baseline that will be used to create the OpenAPI contract and, subsequently, the Spring Boot implementation.
 
@@ -38,7 +38,7 @@ The model is derived from the capabilities represented in the capstone wireframe
 - Returns/refunds
 - Recommendations and related-product functionality
 
-The capstone explicitly identifies PostgreSQL as the database and asks for manual data-model design from the wireframes. It then calls for OpenAPI generation followed by AI-assisted Spring Boot generation. fileciteturn0file0L169-L177 fileciteturn0file0L183-L202
+The capstone explicitly identifies PostgreSQL as the database and asks for manual data-model design from the wireframes. It then calls for OpenAPI generation followed by AI-assisted Spring Boot generation.
 
 ---
 
@@ -53,7 +53,7 @@ PostgreSQL will store normalized business entities and their relationships using
 The model is divided into:
 
 1. **Core MVP entities** required for the main purchase journey.
-2. **Supporting entities** for capabilities that appear in the architecture but have less detailed wireframe information.
+2. **Supporting / Phase-2 entities** for capabilities that appear in the architecture but are intentionally deferred from the first implementation.
 
 ### 3.3 Historical transaction integrity
 
@@ -83,15 +83,12 @@ USER
  │    └── RETURN_REQUEST
  └── GIFT_POINT_ACCOUNT
       └── GIFT_POINT_TRANSACTION
-
 CATALOG
  ├── CATEGORY
  ├── BRAND
  └── PRODUCT
-
 PROMOTION
  └── COUPON
-
 PAYMENT
  └── REFUND
 ```
@@ -117,9 +114,9 @@ The following tables form the minimum database required to support the main cust
 
 ---
 
-# 6. Supporting Entities
+# 6. Supporting / Phase-2 Entities
 
-These tables support additional capabilities shown in the capstone architecture:
+These tables support additional capabilities shown in the capstone architecture but are intentionally deferred from MVP implementation:
 
 | Table | Purpose |
 |---|---|
@@ -130,7 +127,7 @@ These tables support additional capabilities shown in the capstone architecture:
 | `return_requests` | Return-request lifecycle |
 | `refunds` | Refund transactions associated with payments |
 
-The capstone architecture includes shipping, gift points, coupons, returns, refund processing, and recommendations. fileciteturn0file0
+The capstone architecture includes shipping, gift points, coupons, returns, refund processing, and recommendations.
 
 ---
 
@@ -175,7 +172,7 @@ Stores registered user accounts. The capstone architecture includes guest/regist
 
 ### Purpose
 
-Stores reusable customer delivery addresses. The checkout wireframe explicitly requires selecting an address for delivery. fileciteturn0file0L144-L149
+Stores reusable customer delivery addresses. The checkout wireframe explicitly requires selecting an address for delivery.
 
 ### Columns
 
@@ -206,7 +203,7 @@ USER 1 ─────────── N ADDRESS
 
 ### Purpose
 
-Represents catalogue categories. The capstone explicitly requires users to select product categories and access a catalogue for each category. fileciteturn0file0L123-L130
+Represents catalogue categories. The capstone explicitly requires users to select product categories and access a catalogue for each category.
 
 ### Columns
 
@@ -250,8 +247,6 @@ Represents the brands/publishers through which customers can browse products.
 BRAND 1 ─────────── N PRODUCT
 ```
 
-The wireframe explicitly includes browsing brands. fileciteturn0file0L126-L130
-
 ---
 
 ## 7.5 `products`
@@ -259,8 +254,6 @@ The wireframe explicitly includes browsing brands. fileciteturn0file0L1
 ### Purpose
 
 Represents books/products that can be browsed, selected, added to a cart, and purchased.
-
-The customer journey also shows a selected product tagged with a tentative delivery date. fileciteturn0file0L90-L93
 
 ### Columns
 
@@ -297,8 +290,6 @@ CATEGORY 1 ─────────── N PRODUCT N ───────�
 ### Purpose
 
 Represents a customer's shopping cart.
-
-The cart wireframe supports adding products and updating the basket. fileciteturn0file0L137-L143
 
 ### Columns
 
@@ -341,7 +332,7 @@ Contains the individual products and quantities in a cart.
 | `cart_id` | `BIGINT` | FK, NOT NULL | Parent cart |
 | `product_id` | `BIGINT` | FK, NOT NULL | Product in cart |
 | `quantity` | `INTEGER` | NOT NULL, > 0 | Requested quantity |
-| `unit_price` | `NUMERIC(12,2)` | NOT NULL, >= 0 | Current cart price snapshot |
+| `unit_price` | `NUMERIC(12,2)` | NOT NULL, >= 0 | Current cart price snapshot; not authoritative for checkout |
 | `created_at` | `TIMESTAMP` | NOT NULL | Creation timestamp |
 | `updated_at` | `TIMESTAMP` | NOT NULL | Last update timestamp |
 
@@ -352,6 +343,12 @@ UNIQUE(cart_id, product_id)
 ```
 
 This ensures that adding the same product twice updates quantity rather than creating duplicate cart rows.
+
+### Price semantics
+
+`cart_items.unit_price` is the current cart/display price captured when the cart item is created or updated. It is **not authoritative for checkout**.
+
+At checkout, the application must retrieve the current authoritative price from `products.price`, revalidate availability and stock, calculate the order total, and then store the authoritative purchase price in `order_items.unit_price`.
 
 ### Relationship
 
@@ -365,7 +362,7 @@ CART 1 ─────────── N CART_ITEM N ────────�
 
 ### Purpose
 
-Represents a customer purchase. The architecture explicitly includes create/modify order, checkout, confirmation, cancellation, order history, and returns. fileciteturn0file0
+Represents a customer purchase. The architecture explicitly includes create/modify order, checkout, confirmation, cancellation, order history, and returns.
 
 ### Columns
 
@@ -384,13 +381,19 @@ Represents a customer purchase. The architecture explicitly includes create/modi
 | `status` | `VARCHAR(40)` | NOT NULL | Order lifecycle state |
 | `subtotal` | `NUMERIC(12,2)` | NOT NULL, >= 0 | Sum of item subtotals |
 | `shipping_amount` | `NUMERIC(12,2)` | NOT NULL, >= 0 | Shipping charge |
-| `discount_amount` | `NUMERIC(12,2)` | NOT NULL, >= 0 | Coupon/discount reduction |
-| `gift_points_used` | `INTEGER` | NOT NULL, >= 0 | Gift points redeemed |
+| `discount_amount` | `NUMERIC(12,2)` | NOT NULL, >= 0 | Discount reduction; MVP is `0` because coupons are Phase 2 |
+| `gift_points_used` | `INTEGER` | NOT NULL, >= 0, DEFAULT 0 | Phase-2 field; always `0` during MVP |
 | `total_amount` | `NUMERIC(12,2)` | NOT NULL, >= 0 | Final order total |
 | `placed_at` | `TIMESTAMP` | | Order placement timestamp |
 | `cancellation_deadline` | `TIMESTAMP` | | Last time cancellation is allowed |
 | `created_at` | `TIMESTAMP` | NOT NULL | Creation timestamp |
 | `updated_at` | `TIMESTAMP` | NOT NULL | Last update timestamp |
+
+### MVP note: gift points
+
+`gift_points_used` is reserved for Phase-2 gift-point redemption. During MVP it must always be persisted as `0`.
+
+The MVP API does not expose this field and MVP checkout must not calculate, validate, earn, or redeem gift points.
 
 ### Recommended initial statuses
 
@@ -404,11 +407,11 @@ Represents a customer purchase. The architecture explicitly includes create/modi
 - `RETURNED`
 - `REFUNDED`
 
-The exact lifecycle may be simplified for the MVP.
+The exact lifecycle may be simplified for the MVP as permitted by the API contract, but the documented enum values must remain unchanged.
 
 ### Cancellation business rule
 
-The capstone explicitly requires **Cancel Order Within 48 hrs**. fileciteturn0file0L97-L99
+The capstone explicitly requires **Cancel Order Within 48 hrs**.
 
 Therefore:
 
@@ -461,8 +464,6 @@ A catalogue product can later change price or title. Historical orders must rema
 
 Stores payment information and payment lifecycle state.
 
-The payment wireframe explicitly describes selecting a payment option, including credit/debit card examples, completing payment, and providing confirmation. fileciteturn0file0L145-L164
-
 ### Columns
 
 | Column | PostgreSQL Type | Constraints | Description |
@@ -490,17 +491,15 @@ The payment wireframe explicitly describes selecting a payment option, including
 - `FAILED`
 - `REFUNDED`
 
-> The capstone does not identify a real payment provider. The initial implementation can therefore use a simulated payment workflow unless the project owner later requires gateway integration.
+> The MVP uses a simulated payment workflow because no real payment provider is required by the current design. A real gateway remains a future extension.
 
 ---
 
-# 8. Supporting Entity Definitions
+# 8. Supporting / Phase-2 Entity Definitions
 
 ## 8.1 `shipments`
 
-The architecture includes shipping-rate calculation, approximate delivery time, and return shipment. fileciteturn0file0
-
-### Columns
+The architecture includes shipping-rate calculation, approximate delivery time, and return shipment.
 
 | Column | PostgreSQL Type | Constraints |
 |---|---|---|
@@ -529,7 +528,7 @@ The architecture includes shipping-rate calculation, approximate delivery time, 
 
 ## 8.2 `gift_point_accounts`
 
-The payment/purchase flow explicitly includes redeeming gift points. fileciteturn0file0L145-L149
+The payment/purchase architecture includes gift-point functionality, but it is intentionally deferred to Phase 2.
 
 | Column | PostgreSQL Type | Constraints |
 |---|---|---|
@@ -549,7 +548,7 @@ USER 1 ─────────── 1 GIFT_POINT_ACCOUNT
 
 ## 8.3 `gift_point_transactions`
 
-Tracks changes to the gift-point balance.
+Tracks changes to the gift-point balance in Phase 2.
 
 | Column | PostgreSQL Type | Constraints |
 |---|---|---|
@@ -572,7 +571,7 @@ Tracks changes to the gift-point balance.
 
 ## 8.4 `coupons`
 
-The architecture includes coupons within order capabilities. fileciteturn0file0
+Coupon functionality is Phase 2.
 
 | Column | PostgreSQL Type | Constraints |
 |---|---|---|
@@ -587,24 +586,28 @@ The architecture includes coupons within order capabilities. fileciteturn0
 | `valid_until` | `TIMESTAMP` | NOT NULL |
 | `usage_limit` | `INTEGER` | >= 0 |
 | `active` | `BOOLEAN` | NOT NULL |
+| `created_at` | `TIMESTAMP` | NOT NULL |
+| `updated_at` | `TIMESTAMP` | NOT NULL |
 
-> Coupon rules are not defined in detail by the capstone. The schema is therefore provisional and can be simplified or extended during API/business-rule design.
+> Coupon rules are not defined in detail by the capstone. The schema is therefore provisional and can be simplified or extended during Phase-2 API/business-rule design.
 
 ---
 
 ## 8.5 `return_requests`
 
-The architecture includes return orders and return shipment. fileciteturn0file0
+Return functionality is Phase 2.
 
-| Column | PostgreSQL Type | Constraints |
-|---|---|---|
-| `id` | `BIGSERIAL` | PK |
-| `order_id` | `BIGINT` | FK, NOT NULL |
-| `reason` | `VARCHAR(255)` | |
-| `status` | `VARCHAR(30)` | NOT NULL |
-| `requested_at` | `TIMESTAMP` | NOT NULL |
-| `approved_at` | `TIMESTAMP` | |
-| `completed_at` | `TIMESTAMP` | |
+For the current Phase-2 design, an order may have **zero or one return request**. Line-level/partial returns are not supported by the current model.
+
+| Column | PostgreSQL Type | Constraints | Description |
+|---|---|---|---|
+| `id` | `BIGSERIAL` | PK | Return request identifier |
+| `order_id` | `BIGINT` | FK, NOT NULL, UNIQUE | Order being returned; one return request maximum per order |
+| `reason` | `VARCHAR(255)` | NOT NULL | Reason for return request |
+| `status` | `VARCHAR(30)` | NOT NULL | Return lifecycle state |
+| `requested_at` | `TIMESTAMP` | NOT NULL | Request timestamp |
+| `approved_at` | `TIMESTAMP` | | Approval timestamp |
+| `completed_at` | `TIMESTAMP` | | Completion timestamp |
 
 ### Initial statuses
 
@@ -613,13 +616,23 @@ The architecture includes return orders and return shipment. fileciteturn0
 - `REJECTED`
 - `COMPLETED`
 
-Return-item-level detail can be added later if the capstone requires partial returns.
+### Phase-2 design rule
+
+```text
+ORDER 1 ─────────── 0..1 RETURN_REQUEST
+```
+
+The `UNIQUE(order_id)` constraint enforces the one-request-per-order rule.
+
+Partial or line-level returns require a future redesign, potentially introducing a dedicated `return_items` table.
 
 ---
 
 ## 8.6 `refunds`
 
-The architecture includes refund processing. fileciteturn0file0
+Refund processing is Phase 2.
+
+The current MVP OpenAPI contract does not expose refund endpoints.
 
 | Column | PostgreSQL Type | Constraints |
 |---|---|---|
@@ -636,9 +649,7 @@ The architecture includes refund processing. fileciteturn0file0
 
 # 9. Recommendation Design
 
-The capstone requires related products and recommendations based on order history. The wireframes show related products and order-history-based recommendations, while the architecture also mentions upsell/cross-sell functionality. fileciteturn0file0L123-L143
-
-The initial database design intentionally does **not** add a `recommendations` table.
+The capstone requires related products and recommendations based on order history. The initial database design intentionally does **not** add a `recommendations` table.
 
 ### Initial approach
 
@@ -667,7 +678,7 @@ This is an application-level design decision. The capstone does not prescribe a 
 
 # 10. Related Product Design
 
-The capstone explicitly requires related products to appear during catalogue/product browsing. fileciteturn0file0L128-L131
+The capstone explicitly requires related products to appear during catalogue/product browsing.
 
 The initial design derives related products from catalogue attributes rather than storing an additional many-to-many relationship.
 
@@ -693,30 +704,22 @@ The core relational model is:
 
 ```mermaid
 erDiagram
-
     USERS ||--o{ ADDRESSES : has
     USERS ||--|| CARTS : owns
     USERS ||--o{ ORDERS : places
     USERS ||--|| GIFT_POINT_ACCOUNTS : owns
-
     CATEGORIES ||--o{ PRODUCTS : contains
     BRANDS ||--o{ PRODUCTS : has
-
     CARTS ||--o{ CART_ITEMS : contains
     PRODUCTS ||--o{ CART_ITEMS : included_in
-
     ORDERS ||--o{ ORDER_ITEMS : contains
     PRODUCTS ||--o{ ORDER_ITEMS : purchased_as
-
     ORDERS ||--|| PAYMENTS : has
     ORDERS ||--|| SHIPMENTS : has
-    ORDERS ||--o{ RETURN_REQUESTS : may_have
-
+    ORDERS ||--o| RETURN_REQUESTS : may_have
     PAYMENTS ||--o{ REFUNDS : may_have
-
     GIFT_POINT_ACCOUNTS ||--o{ GIFT_POINT_TRANSACTIONS : records
     ORDERS ||--o{ GIFT_POINT_TRANSACTIONS : may_reference
-
     USERS {
         bigint id PK
         varchar email UK
@@ -724,7 +727,6 @@ erDiagram
         varchar role
         varchar status
     }
-
     ADDRESSES {
         bigint id PK
         bigint user_id FK
@@ -734,19 +736,16 @@ erDiagram
         varchar postal_code
         varchar country
     }
-
     CATEGORIES {
         bigint id PK
         varchar name UK
         boolean active
     }
-
     BRANDS {
         bigint id PK
         varchar name UK
         boolean active
     }
-
     PRODUCTS {
         bigint id PK
         varchar title
@@ -759,13 +758,11 @@ erDiagram
         integer delivery_days_max
         boolean active
     }
-
     CARTS {
         bigint id PK
         bigint user_id FK
         varchar status
     }
-
     CART_ITEMS {
         bigint id PK
         bigint cart_id FK
@@ -773,7 +770,6 @@ erDiagram
         integer quantity
         numeric unit_price
     }
-
     ORDERS {
         bigint id PK
         varchar order_number UK
@@ -787,7 +783,6 @@ erDiagram
         timestamp placed_at
         timestamp cancellation_deadline
     }
-
     ORDER_ITEMS {
         bigint id PK
         bigint order_id FK
@@ -797,7 +792,6 @@ erDiagram
         numeric unit_price
         numeric subtotal
     }
-
     PAYMENTS {
         bigint id PK
         bigint order_id FK UK
@@ -807,7 +801,6 @@ erDiagram
         varchar status
         timestamp paid_at
     }
-
     SHIPMENTS {
         bigint id PK
         bigint order_id FK UK
@@ -818,13 +811,11 @@ erDiagram
         varchar tracking_number UK
         varchar status
     }
-
     GIFT_POINT_ACCOUNTS {
         bigint id PK
         bigint user_id FK UK
         integer balance
     }
-
     GIFT_POINT_TRANSACTIONS {
         bigint id PK
         bigint account_id FK
@@ -832,15 +823,13 @@ erDiagram
         varchar type
         integer points
     }
-
     RETURN_REQUESTS {
         bigint id PK
-        bigint order_id FK
+        bigint order_id FK UK
         varchar reason
         varchar status
         timestamp requested_at
     }
-
     REFUNDS {
         bigint id PK
         bigint payment_id FK
@@ -859,7 +848,7 @@ erDiagram
 | User → Address | 1:N | A user can save multiple addresses |
 | User → Cart | 1:1 | One active cart per user in the initial model |
 | User → Order | 1:N | A user can place many orders |
-| User → GiftPointAccount | 1:1 | One loyalty account per user |
+| User → GiftPointAccount | 1:1 | One loyalty account per user in Phase 2 |
 | Category → Product | 1:N | A category contains many products |
 | Brand → Product | 1:N | A brand contains many products |
 | Cart → CartItem | 1:N | A cart contains many lines |
@@ -867,9 +856,9 @@ erDiagram
 | Order → OrderItem | 1:N | An order contains many purchased lines |
 | Product → OrderItem | 1:N | A product can appear in many orders |
 | Order → Payment | 1:1 | One primary payment record per order in MVP |
-| Order → Shipment | 1:1 | One shipment record per order in MVP |
-| Order → ReturnRequest | 1:N | An order may have one or more return records over time if required |
-| Payment → Refund | 1:N | A payment may have one or more refund transactions |
+| Order → Shipment | 1:1 | One shipment record per order in Phase 2 |
+| Order → ReturnRequest | 1:0..1 | An order may have zero or one return request in the current Phase-2 design |
+| Payment → Refund | 1:N | A payment may have one or more refund transactions in Phase 2 |
 | GiftPointAccount → GiftPointTransaction | 1:N | An account has a transaction history |
 
 ---
@@ -911,11 +900,21 @@ orders.total_amount >= 0
 orders.gift_points_used >= 0
 ```
 
+During MVP, `orders.gift_points_used` must always be persisted as `0`.
+
 ## Payment
 
 ```text
 payments.amount >= 0
 payments.payment_reference UNIQUE
+payments.order_id UNIQUE
+```
+
+## Return Request — Phase 2
+
+```text
+return_requests.order_id UNIQUE
+return_requests.reason NOT NULL
 ```
 
 ---
@@ -937,6 +936,7 @@ Initial indexes should focus on lookup paths used by the planned APIs.
 | `cart_items` | `cart_id` | Cart retrieval |
 | `order_items` | `order_id` | Order-detail retrieval |
 | `payments` | `payment_reference` | Payment lookup; also unique |
+| `return_requests` | `order_id` | Return lookup; also unique |
 
 Search-specific indexing can be refined after the OpenAPI query requirements are finalized.
 
@@ -946,7 +946,7 @@ Search-specific indexing can be refined after the OpenAPI query requirements are
 
 ## 15.1 Order cancellation
 
-The capstone explicitly specifies cancellation within 48 hours. fileciteturn0file0L97-L99
+The capstone explicitly specifies cancellation within 48 hours.
 
 ```text
 cancellation_deadline = placed_at + 48 hours
@@ -974,11 +974,17 @@ UNIQUE(cart_id, product_id)
 
 ## 15.4 Order price integrity
 
-Order totals must be based on the price captured at purchase time, not the current catalogue price.
+Order totals must be based on the authoritative current product price at checkout. After the order is created, `order_items.unit_price` becomes the historical purchase-price snapshot.
+
+The `cart_items.unit_price` value is not authoritative for final checkout pricing.
 
 ## 15.5 Historical address integrity
 
 The order stores the delivery address as a snapshot so later customer address changes do not rewrite historical purchases.
+
+## 15.6 Phase-2 gift-point preservation
+
+The MVP `orders.gift_points_used` field is reserved for future gift-point redemption and must remain `0` during MVP.
 
 ---
 
@@ -1021,7 +1027,7 @@ Payment
 Confirmation
 ```
 
-The capstone's core customer journey explicitly follows this general browse → select → cart → address → payment → confirmation flow. fileciteturn0file0L78-L101
+The capstone's core customer journey explicitly follows this general browse → select → cart → address → payment → confirmation flow.
 
 ---
 
@@ -1038,7 +1044,9 @@ return_requests
 refunds
 ```
 
-These correspond to additional architecture capabilities such as shipping, gift points, coupons, returns, and refund processing. fileciteturn0file0
+These correspond to additional architecture capabilities such as shipping, gift points, coupons, returns, and refund processing.
+
+Phase-2 tables must not be generated during MVP implementation unless the project explicitly enters Phase 2.
 
 ---
 
@@ -1082,7 +1090,7 @@ The following illustrates how the entities work together for a normal purchase.
        ↓
 7. Order copies shipping address into its snapshot
        ↓
-8. OrderItem copies purchased title + price
+8. OrderItem copies purchased title + authoritative checkout price
        ↓
 9. Payment is initiated
        ↓
@@ -1103,16 +1111,15 @@ Conceptually:
 
 ```text
 BEGIN TRANSACTION
-
 1. Validate cart
 2. Validate product availability
-3. Recalculate totals
-4. Copy cart items into order items
-5. Snapshot shipping address
-6. Create order
-7. Reserve/decrement stock according to implementation strategy
-8. Create payment record
-
+3. Re-fetch authoritative current product prices
+4. Recalculate totals
+5. Copy cart items into order items
+6. Snapshot shipping address
+7. Create order
+8. Reserve/decrement stock according to implementation strategy
+9. Create payment record
 COMMIT
 ```
 
@@ -1130,33 +1137,42 @@ Payment-gateway communication, if a real provider is later introduced, may requi
 | Cart and CartItem | **Wireframe-derived** | Basket/cart workflow requires line-level products |
 | OrderItem | **Design decision** | Needed to model multiple products per order correctly |
 | Payment entity | **Wireframe/architecture-derived** | Payment is a distinct workflow |
-| Shipment entity | **Architecture-derived** | Shipping is a distinct capability |
+| Shipment entity | **Architecture-derived / Phase 2** | Shipping is a distinct capability but deferred from MVP |
 | 48-hour cancellation deadline | **Explicit business rule** | Directly specified by capstone |
 | Delivery day range fields | **Design decision** | Concrete representation of tentative delivery timing |
 | Order shipping-address snapshot | **Design decision** | Preserve historical transaction integrity |
 | Product title/price snapshot in OrderItem | **Design decision** | Preserve historical purchase values |
 | Recommendation table | **Deferred design** | Algorithm/persistence not specified |
 | Product relations table | **Deferred design** | Related-product rules not specified |
-| Real payment gateway | **TBD** | Provider not specified by capstone |
+| Real payment gateway | **Future extension** | MVP uses a simulated payment workflow |
+| ReturnRequest cardinality | **Phase-2 design decision** | One order may have zero or one return request in the current model |
+| Partial/line-level returns | **Deferred design** | Requires a future `return_items` model if needed |
 
 ---
 
 # 22. Open Data-Model Decisions
 
-The following items should be resolved before implementation or captured as explicit assumptions in the project README:
+The following items remain open and should be resolved before implementing the affected future capability or captured as explicit assumptions in the project README:
 
-1. Whether the final user model needs registration APIs beyond login/logout.
-2. Exact roles and permissions under the architecture's role/entitlement capability.
-3. Whether one order can have multiple payments or only one primary payment.
-4. Whether partial returns are required, which would justify a `return_items` table.
-5. Exact coupon rules and whether an order may contain multiple coupons.
-6. Whether gift points are earned automatically from orders and at what rate.
-7. Exact shipping-rate calculation rules.
-8. Whether payment remains simulated or integrates with an actual gateway.
-9. Whether PostgreSQL full-text search is needed for product search.
-10. Whether related/recommended products need manually curated relationships.
+1. Exact roles and permissions under the architecture's role/entitlement capability.
+2. Exact shipping-rate calculation rules.
+3. Gift-point earning rate and expiry rules for Phase 2.
+4. Coupon rules, including stacking and usage rules, for Phase 2.
+5. Detailed refund workflow for Phase 2.
+6. Detailed shipment workflow for Phase 2.
+7. Whether PostgreSQL full-text search is needed for product search.
+8. Whether related/recommended products need manually curated relationships.
 
-None of these should be silently assumed to be IBM-specified requirements.
+Resolved for MVP:
+
+- One order has at most one payment record.
+- MVP payment is simulated.
+- MVP does not implement gift-point redemption.
+- MVP does not implement coupons.
+- MVP does not implement shipments, returns, or refunds.
+- Partial/line-level returns are not supported by the current Phase-2 return model.
+
+None of the remaining open items should be silently assumed to be IBM-specified requirements.
 
 ---
 
@@ -1176,7 +1192,7 @@ JPA Entity
 PostgreSQL
 ```
 
-Suggested entity names:
+Suggested MVP entity names:
 
 ```text
 User
@@ -1189,6 +1205,11 @@ CartItem
 Order
 OrderItem
 Payment
+```
+
+Suggested Phase-2 entity names:
+
+```text
 Shipment
 GiftPointAccount
 GiftPointTransaction
@@ -1212,7 +1233,7 @@ The project should use consistent PostgreSQL naming:
 - Primary keys: `id`
 - Foreign keys: `<entity>_id`
 - Timestamps: `created_at`, `updated_at`
-- Boolean values: `is_*` where appropriate, e.g. `is_default`
+- Boolean values: follow the actual column names defined by the model
 
 Examples:
 
@@ -1220,7 +1241,13 @@ Examples:
 order_items.order_id
 products.category_id
 addresses.user_id
+addresses.is_default
+categories.active
+brands.active
+products.active
 ```
+
+Do not rename existing boolean columns to introduce a universal `is_` prefix.
 
 ---
 
@@ -1241,6 +1268,9 @@ Step 2 is complete when all of the following are true:
 - [ ] Primary and foreign-key relationships are defined.
 - [ ] Important uniqueness and validation constraints are identified.
 - [ ] The ERD is consistent with the table definitions.
+- [ ] The return-request relationship is explicitly 1:0..1 and enforced with `UNIQUE(order_id)`.
+- [ ] `return_requests.reason` is explicitly `NOT NULL`.
+- [ ] `orders.gift_points_used` is explicitly Phase 2 and defaults to `0` during MVP.
 - [ ] The model is ready to be translated into OpenAPI request/response objects.
 
 ---
@@ -1253,9 +1283,9 @@ The next artifact is:
 03-openapi-specification.yaml
 ```
 
-The capstone instructs us to use the wireframes and identified entities/operations to generate and review an OpenAPI specification before using that specification to generate the Spring Boot application. fileciteturn0file0L192-L202
-
 The OpenAPI design should therefore be based on this document rather than allowing the AI agent to invent a competing data model.
+
+Before generating or changing the OpenAPI contract, verify that its MVP/Phase-2 endpoint boundaries match the requirements and this data model.
 
 ---
 
@@ -1286,23 +1316,23 @@ The OpenAPI design should therefore be based on this document rather than allowi
 
 ```text
 USER
- │
- ├────────────── ADDRESS
- │
- ├────────────── CART
- │                 │
- │                 └──── CART_ITEM ───── PRODUCT
- │                                      /       \
- │                                     /         \
- │                              CATEGORY        BRAND
- │
- └────────────── ORDER
-                    │
-            ┌───────┼────────┬──────────┐
-            │       │        │          │
-        ORDER_ITEM PAYMENT SHIPMENT  RETURN_REQUEST
-            │
-            └──── PRODUCT
+  │
+  ├────────────── ADDRESS
+  │
+  ├────────────── CART
+  │                  │
+  │                  └──── CART_ITEM ───── PRODUCT
+  │                                           /       \\
+  │                                          /         \\
+  │                                   CATEGORY       BRAND
+  │
+  └────────────── ORDER
+                     │
+             ┌───────┼────────┬──────────┐
+             │       │        │          │
+         ORDER_ITEM PAYMENT SHIPMENT RETURN_REQUEST
+             │
+             └──── PRODUCT
 
 PAYMENT
    │
@@ -1317,5 +1347,5 @@ USER
 
 ---
 
-**Status:** Proposed baseline for Step 2.  
+**Status:** Revised baseline for Step 2 after design-consistency audit.  
 **Next artifact:** `03-openapi-specification.yaml`
