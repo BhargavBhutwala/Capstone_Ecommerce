@@ -9,7 +9,7 @@ info:
     architecture, and manually prepared data model. The contract covers
     the core purchase journey first, with supporting capabilities for
     order history, buy-again, gift points, coupons, shipping, returns,
-    and refunds.
+    and refunds. Refund processing is a Phase 2 feature and is not exposed by the MVP API. No refund endpoints are implemented in the current API contract.
 
 servers:
   - url: http://localhost:8080/api
@@ -1157,12 +1157,6 @@ components:
           type: integer
           format: int64
           minimum: 1
-        couponCode:
-          type: string
-          maxLength: 50
-        giftPointsToRedeem:
-          type: integer
-          minimum: 0
 
     OrderItemResponse:
       type: object
@@ -1247,9 +1241,6 @@ components:
         discountAmount:
           type: number
           format: double
-          minimum: 0
-        giftPointsUsed:
-          type: integer
           minimum: 0
         totalAmount:
           type: number

@@ -299,15 +299,25 @@ The checkout flow shall allow the user to select the address to be used for deli
 
 The checkout/payment flow shall support redemption of gift points.
 
-**Priority:** Medium
+**Priority:** Phase 2 / Deferred
+
+**MVP Status:** Deferred
+
+**MVP Scope:** Gift point redemption is not implemented in the MVP checkout flow. The MVP shall not calculate, validate, earn, redeem, or persist gift points.
+
+**Phase 2 Scope:** Gift point redemption will be implemented in a future phase together with gift point accounts, gift point transactions, earning rules, redemption rules, and expiry rules.
 
 ### FR-025 — Coupons
 
-The order capability shall support coupons.
+The checkout flow shall support coupon validation and application.
 
-**Note:** Coupon validity, discount calculation, usage limits, and other business rules are not defined by the source.
+**Priority:** Phase 2 / Deferred
 
-**Priority:** Medium
+**MVP Status:** Deferred
+
+**MVP Scope:** Coupons are not implemented in the MVP checkout flow. The MVP shall not validate, apply, calculate, or persist coupon discounts.
+
+**Phase 2 Scope:** Coupon functionality will be implemented in a future phase together with coupon validation, discount calculation, expiry rules, usage rules, and coupon stacking rules.
 
 ---
 
@@ -408,11 +418,15 @@ The system shall support order returns.
 
 ### FR-037 — Refund Processing
 
-The architecture identifies refund processing as a payment capability.
+The system shall support refund processing for eligible returned or cancelled orders.
 
-**Note:** Detailed refund rules are not specified.
+**Priority:** Phase 2 / Deferred
 
-**Priority:** Low / Future
+**MVP Status:** Deferred
+
+**MVP Scope:** Refund processing is not implemented in the MVP. The MVP shall not create, process, track, or expose refund operations through the REST API.
+
+**Phase 2 Scope:** Refund processing will be implemented together with the `refunds` data model, return/refund business rules, and appropriate REST API endpoints.
 
 ---
 

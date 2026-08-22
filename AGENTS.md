@@ -34,7 +34,7 @@ Do not generate Phase-2 functionality while implementing the MVP unless explicit
 
 ---
 
-## Document Dependency Order
+# Document Dependency Order
 
 The project follows this strict dependency chain:
 
@@ -48,7 +48,7 @@ The project follows this strict dependency chain:
 Spring Boot implementation
 ```
 
-### Rules
+## Rules
 
 1. Requirements define what the system must do.
 2. The data model defines how required business data is persisted.
@@ -56,6 +56,7 @@ Spring Boot implementation
 4. Implementation must conform to the existing artifacts.
 5. Code must not silently redefine business requirements.
 6. If implementation reveals a genuine contradiction or missing requirement, stop and report it before changing the design.
+7. Changes to requirements, the data model, or the API contract must be resolved at the design level before dependent implementation code is changed.
 
 The implementation is **not** the source of truth for requirements or API behavior.
 
@@ -99,7 +100,7 @@ The implementation is **not** the source of truth for requirements or API behavi
 ## Core Java Conventions
 
 * Use `BigDecimal` for monetary values.
-* Do not use `double` or `float` for currency.
+* Do not use `double` or `float` for monetary values.
 * Use appropriate Java time types consistently.
 * Prefer immutable DTOs where practical.
 * Prefer explicit, readable code over unnecessary abstractions.
@@ -121,16 +122,25 @@ com.yourcompany.ebookstore
 ├── address
 ├── order
 ├── payment
-├── shipping
-├── loyalty
-├── coupon
-├── returns
 ├── security
 ├── config
 └── common
 ```
 
-Each domain should organize its components by responsibility, for example:
+Future/Phase-2 domains may include:
+
+```text
+shipping
+loyalty
+coupon
+returns
+```
+
+These Phase-2 domains must not be implemented during MVP generation.
+
+Each implemented domain should organize components by responsibility.
+
+Example:
 
 ```text
 order/
@@ -157,7 +167,7 @@ JPA Entity
 PostgreSQL
 ```
 
-### Controller
+## Controller
 
 Responsible for:
 
@@ -168,7 +178,7 @@ Responsible for:
 
 Controllers must not contain business logic.
 
-### Service
+## Service
 
 Responsible for:
 
@@ -176,11 +186,12 @@ Responsible for:
 * transaction boundaries
 * orchestration of multiple repositories
 * authorization checks that depend on domain state
-* calculations and state transitions
+* calculations
+* state transitions
 
 Business rules must not be moved into repository queries merely to simplify service code.
 
-### Repository
+## Repository
 
 Responsible for:
 
@@ -190,7 +201,7 @@ Responsible for:
 
 Repositories should not contain business workflows.
 
-### Entity
+## Entity
 
 JPA entities represent persistent state.
 
@@ -251,6 +262,7 @@ gift_point_transactions
 
 * `snake_case`
 * descriptive names
+* column names must match the existing data model exactly
 
 Examples:
 
@@ -262,14 +274,20 @@ unit_price
 cancellation_deadline
 ```
 
-Boolean columns should use the `is_` prefix where defined by the data model:
+Boolean column names must follow the actual data model rather than imposing a universal naming rule.
+
+Examples from the current design:
 
 ```text
-is_default
-is_active
+addresses.is_default
+categories.active
+brands.active
+products.active
 ```
 
-### Keys
+Do not rename `active` to `is_active` unless the data model is explicitly changed first.
+
+## Keys
 
 Primary keys:
 
@@ -321,7 +339,8 @@ for monetary columns.
 Examples include:
 
 * product price
-* unit price
+* cart item unit price
+* order item unit price
 * order subtotal
 * shipping amount
 * order total
@@ -330,6 +349,22 @@ Examples include:
 Server-side calculation must be authoritative.
 
 Never trust client-provided totals or prices.
+
+## OpenAPI Monetary Fields
+
+OpenAPI monetary schemas may use:
+
+```yaml
+type: number
+```
+
+and may include a numeric format such as `double`.
+
+The OpenAPI representation must **not** be interpreted as permission to use Java `double` or `float`.
+
+All monetary values in Java must use `BigDecimal`.
+
+All monetary values in PostgreSQL must use `NUMERIC(12,2)`.
 
 ---
 
@@ -450,6 +485,23 @@ The service layer must update the existing cart item instead of creating a dupli
 
 ---
 
+## Cart Price vs Checkout Price
+
+`cart_items.unit_price` represents the price snapshot/display value associated with the item while it is in the cart.
+
+It is **not authoritative for final checkout pricing**.
+
+During checkout:
+
+1. Retrieve the current authoritative product price from `products`.
+2. Revalidate product availability and stock.
+3. Calculate the final order total using authoritative server-side values.
+4. Store the final purchase price in `order_items.unit_price`.
+
+The historical order item price is the authoritative purchase-price snapshot after checkout.
+
+---
+
 ## Payment Relationship
 
 `payments.order_id` is unique.
@@ -518,7 +570,7 @@ refunds
 
 ## Intentionally Deferred Features
 
-The following do not require dedicated database tables in the current design:
+The following do not require dedicated database tables in the current MVP design:
 
 ```text
 recommendations
@@ -534,6 +586,116 @@ Where applicable, recommendation-related behavior should be implemented using ap
 * order history
 
 Do not invent recommendation tables merely because they might be useful later.
+
+---
+
+# Phase-2 Feature Boundaries
+
+## Gift Points
+
+Gift point functionality is Phase 2.
+
+The MVP order API must not:
+
+* accept gift-point redemption
+* calculate gift-point discounts
+* validate gift-point balances
+* earn gift points
+* redeem gift points
+* persist gift-point transactions
+
+The MVP must not generate:
+
+* gift point controllers
+* gift point services
+* gift point repositories
+* gift point entities
+* gift point migrations
+
+The `giftPointsToRedeem` and related response fields must not be treated as MVP implementation requirements.
+
+---
+
+## Coupons
+
+Coupon functionality is Phase 2.
+
+The MVP checkout flow must not:
+
+* accept coupon codes
+* validate coupons
+* calculate coupon discounts
+* apply coupon stacking rules
+* persist coupon usage
+
+The MVP must not generate:
+
+* coupon controllers
+* coupon services
+* coupon repositories
+* coupon entities
+* coupon migrations
+
+Coupon-specific API endpoints may be documented for future implementation but are not part of the MVP implementation scope.
+
+---
+
+## Shipping
+
+Shipment management is Phase 2.
+
+The MVP may expose product-level delivery estimate information where defined by the OpenAPI contract, but it must not implement:
+
+* shipment lifecycle management
+* shipment tracking
+* shipment persistence
+* shipment controllers/services/repositories
+
+unless Phase 2 is explicitly started.
+
+---
+
+## Returns
+
+Returns are Phase 2.
+
+For the current Phase-2 data model:
+
+```text
+Order → ReturnRequest = 1 : 0..1
+```
+
+An order may have zero or one return request.
+
+`return_requests.order_id` must therefore be unique.
+
+Line-level or partial returns are not supported by the current design.
+
+Partial returns must not be invented during implementation.
+
+`return_requests.reason` is required and should be persisted as `NOT NULL` with the documented maximum length of 255 characters.
+
+The MVP must not generate return controllers, services, repositories, entities, or migrations.
+
+---
+
+## Refunds
+
+Refund processing is Phase 2.
+
+The `refunds` table may exist in the Phase-2 data model, but the MVP does not implement refund processing.
+
+The MVP OpenAPI contract does not expose refund endpoints.
+
+The MVP must not generate:
+
+* refund controllers
+* refund services
+* refund repositories
+* refund entities
+* refund migrations
+
+Refund management may be implemented only when Phase 2 begins and the API contract is explicitly defined.
 
 ---
 
@@ -558,6 +720,27 @@ Do not silently:
 * change status codes
 
 If an API change appears necessary, explain the reason and resolve the design change before implementation.
+
+---
+
+# OpenAPI MVP and Phase-2 Scope
+
+The OpenAPI document may contain documentation for future Phase-2 functionality.
+
+During MVP implementation, Bob must implement **only endpoints explicitly classified as MVP**.
+
+The existence of a Phase-2 endpoint, schema, or data model entity must not cause Bob to generate its implementation during MVP development.
+
+Phase-2 endpoints must not result in automatic creation of:
+
+* controllers
+* services
+* repositories
+* entities
+* migrations
+* tests
+
+during MVP generation.
 
 ---
 
@@ -640,6 +823,18 @@ sort=price,desc
 
 Do not invent a different sorting syntax.
 
+### Order History
+
+`GET /orders` returns orders for the authenticated customer sorted by:
+
+```text
+placed_at DESC
+```
+
+newest order first.
+
+The MVP does not expose a client-controlled sort parameter for order history unless the OpenAPI contract is explicitly changed.
+
 ---
 
 ## Error Response
@@ -675,7 +870,7 @@ These enum values must be preserved exactly between the OpenAPI contract, Java i
 | `UserRole`                 | `CUSTOMER`, `ADMIN`                                                                                                     |
 | `UserStatus`               | `ACTIVE`, `INACTIVE`, `LOCKED`                                                                                          |
 | `CartStatus`               | `ACTIVE`, `CHECKED_OUT`, `ABANDONED`                                                                                    |
-| `OrderStatus`              | `PENDING_PAYMENT`, `PAID`, `CONFIRMED`, `SHIPPED`, `DELIVERED`, `CANCELLED`, `RETURN_REQUESTED`, `RETURNED`, `REFUNDED` |
+| `OrderStatus`              | `PENDING_PAYMENT`, `PAID`, `CONFIRMED`, `CANCELLED`, `SHIPPED`, `DELIVERED`, `RETURN_REQUESTED`, `RETURNED`, `REFUNDED` |
 | `PaymentMethod`            | `CREDIT_CARD`, `DEBIT_CARD`                                                                                             |
 | `PaymentStatus`            | `INITIATED`, `PROCESSING`, `SUCCESS`, `FAILED`, `REFUNDED`                                                              |
 | `ShipmentStatus`           | `PENDING`, `SHIPPED`, `IN_TRANSIT`, `DELIVERED`, `RETURNED`                                                             |
@@ -776,9 +971,9 @@ Before checkout:
 
 1. Validate that every product still exists and is active.
 2. Revalidate stock.
-3. Calculate authoritative prices.
+3. Retrieve authoritative current product prices.
 4. Create the order from validated data.
-5. Decrement inventory consistently within the checkout transaction.
+5. Decrement stock consistently within the checkout transaction.
 
 Do not rely solely on the cart's previous state.
 
@@ -889,26 +1084,29 @@ Prevent duplicate successful payment processing for the same order.
 
 The following decisions are resolved for the current implementation:
 
-| Decision                | Resolution                                       |
-| ----------------------- | ------------------------------------------------ |
-| Java version            | Java 21                                          |
-| Framework               | Spring Boot 3.x                                  |
-| Database                | PostgreSQL                                       |
-| Persistence             | Spring Data JPA                                  |
-| Schema management       | Flyway                                           |
-| Authentication          | Stateless JWT Bearer                             |
-| Password hashing        | BCrypt                                           |
-| Roles                   | `CUSTOMER`, `ADMIN`                              |
-| Payment                 | Simulated payment processor for MVP              |
-| Currency representation | `BigDecimal` / `NUMERIC(12,2)`                   |
-| Architecture            | Domain-oriented modular monolith                 |
-| API style               | REST / OpenAPI 3.0.3                             |
-| DTO strategy            | Request/response DTOs, no direct entity exposure |
-| Recommendations         | Stateless application logic for MVP              |
-| Gift points             | Phase 2                                          |
-| Coupons                 | Phase 2                                          |
-| Returns/refunds         | Phase 2                                          |
-| Shipment management     | Phase 2                                          |
+| Decision                | Resolution                                                         |
+| ----------------------- | ------------------------------------------------------------------ |
+| Java version            | Java 21                                                            |
+| Framework               | Spring Boot 3.x                                                    |
+| Database                | PostgreSQL                                                         |
+| Persistence             | Spring Data JPA                                                    |
+| Schema management       | Flyway                                                             |
+| Authentication          | Stateless JWT Bearer                                               |
+| Password hashing        | BCrypt                                                             |
+| Roles                   | `CUSTOMER`, `ADMIN`                                                |
+| Payment                 | Simulated payment processor for MVP                                |
+| Currency representation | `BigDecimal` / `NUMERIC(12,2)`                                     |
+| Architecture            | Domain-oriented modular monolith                                   |
+| API style               | REST / OpenAPI 3.0.3                                               |
+| DTO strategy            | Request/response DTOs, no direct entity exposure                   |
+| Recommendations         | Stateless application logic for MVP                                |
+| Gift points             | Phase 2                                                            |
+| Coupons                 | Phase 2                                                            |
+| Shipments               | Phase 2                                                            |
+| Returns                 | Phase 2                                                            |
+| Refunds                 | Phase 2                                                            |
+| Return cardinality      | One return request maximum per order in the current Phase-2 design |
+| Order history sorting   | `placed_at DESC`                                                   |
 
 ---
 
@@ -923,7 +1121,6 @@ The following remain open unless explicitly resolved in the project documentatio
 * Gift-point earning rate
 * Gift-point expiry rules
 * Coupon stacking rules
-* Partial/line-level return requirements
 * Detailed refund workflow
 * Detailed shipment workflow
 
@@ -1024,8 +1221,6 @@ Never log:
 
 Each major feature should include automated tests.
 
-At minimum:
-
 ## Unit Tests
 
 Test:
@@ -1108,7 +1303,7 @@ Before implementing a major feature:
 
 ## Development Modes
 
-Use IBM Bob modes intentionally:
+Use IBM Bob modes intentionally.
 
 ### Ask Mode
 
@@ -1118,7 +1313,7 @@ Use for:
 * requirements analysis
 * consistency checks
 * code explanations
-* reviews that should not modify files
+* non-mutating reviews
 
 Do not modify files during design analysis unless explicitly requested.
 
@@ -1188,6 +1383,8 @@ The backend should be built incrementally in this general order:
 
 Do not generate the complete application in one step.
 
+Do not generate Phase-2 modules during MVP implementation.
+
 ---
 
 # Git and Change Management
@@ -1200,6 +1397,7 @@ Recommended milestones include:
 docs: add requirements, data model and OpenAPI specification
 chore: initialize IBM Bob project context
 chore: define project rules
+docs: resolve design consistency issues
 chore: initialize Spring Boot project
 feat: add PostgreSQL and Flyway schema
 feat: implement authentication
