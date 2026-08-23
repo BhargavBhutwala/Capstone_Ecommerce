@@ -1,0 +1,251 @@
+/* CartPage — authenticated cart layout */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.heading {
+  font-size: 1.625rem;
+  font-weight: 800;
+  color: #1f2328;
+  margin: 0;
+}
+
+/* ── Mutation-level error ─────────────────────────────────────────────────── */
+
+.mutationError {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* ── Item list ────────────────────────────────────────────────────────────── */
+
+.itemList {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.listHeader {
+  display: grid;
+  grid-template-columns: 1fr 160px 120px;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: #f7f8fa;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #57606a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Single item row ─────────────────────────────────────────────────────── */
+
+.itemRow {
+  display: grid;
+  grid-template-columns: 1fr 160px 120px;
+  grid-template-rows: auto auto;
+  gap: 0.5rem 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: start;
+}
+
+.itemRow:last-child {
+  border-bottom: none;
+}
+
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.itemTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2328;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.itemTitle:hover {
+  color: #3b82d4;
+  text-decoration: underline;
+}
+
+.itemIsbn {
+  font-size: 0.75rem;
+  color: #8b949e;
+}
+
+.itemUnitPrice {
+  font-size: 0.8rem;
+  color: #57606a;
+}
+
+.itemActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.qtyLabel {
+  font-size: 0.8rem;
+  color: #57606a;
+  white-space: nowrap;
+}
+
+.qtyInput {
+  width: 64px;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: #1f2328;
+  text-align: center;
+  /* Hide number input spinners in Firefox */
+  -moz-appearance: textfield;
+}
+
+.qtyInput::-webkit-inner-spin-button,
+.qtyInput::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+.qtyInput:focus {
+  outline: none;
+  border-color: #3b82d4;
+  box-shadow: 0 0 0 2px rgba(59, 130, 212, 0.15);
+}
+
+.qtyInput:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.removeBtn {
+  background: none;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.removeBtn:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.removeBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.itemSubtotal {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2328;
+  text-align: right;
+  padding-top: 0.125rem;
+}
+
+/* Row-level inline error (409 conflict, 400) */
+.rowError {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  padding: 0.375rem 0.75rem;
+  margin: 0;
+}
+
+/* ── Order summary ────────────────────────────────────────────────────────── */
+
+.summary {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.5rem;
+  max-width: 360px;
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.925rem;
+  color: #1f2328;
+}
+
+.summaryTotal {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.checkoutBtn {
+  display: block;
+  text-align: center;
+  background: #3b82d4;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 0.25rem;
+  transition: background 0.15s;
+}
+
+.checkoutBtn:hover {
+  background: #2563b8;
+}
+
+/* ── Empty cart helper link ──────────────────────────────────────────────── */
+
+.shopLink {
+  display: inline-block;
+  color: #3b82d4;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.shopLink:hover {
+  text-decoration: underline;
+}
+
+/* ── Recommendations ─────────────────────────────────────────────────────── */
+
+.recommendations {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.recTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2328;
+  margin: 0;
+}

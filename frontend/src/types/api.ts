@@ -134,3 +134,47 @@ export interface PagedResponse<T> {
   content: T[]
   page: PageMeta
 }
+
+// ─── Cart ──────────────────────────────────────────────────────────────────────
+
+export type CartStatus = 'ACTIVE' | 'CHECKED_OUT' | 'ABANDONED'
+
+/** POST /cart/items request body — operationId: addCartItem */
+export interface AddCartItemRequest {
+  productId: number
+  /** minimum: 1, maximum: 999 */
+  quantity: number
+}
+
+/** PUT /cart/items/{itemId} request body — operationId: updateCartItem */
+export interface UpdateCartItemRequest {
+  /** minimum: 1, maximum: 999 */
+  quantity: number
+}
+
+/** Single item in a CartResponse — operationId: getCart / addCartItem / updateCartItem */
+export interface CartItemResponse {
+  id: number
+  product: ProductSummary
+  quantity: number
+  /** Server-computed unit price — BigDecimal-sourced, render with 2 dp */
+  unitPrice: number
+  /** Server-computed line subtotal */
+  subtotal: number
+}
+
+/**
+ * Full cart payload returned by getCart, addCartItem, updateCartItem.
+ * operationId: getCart
+ */
+export interface CartResponse {
+  id: number
+  status: CartStatus
+  items: CartItemResponse[]
+  /** Server-computed cart subtotal */
+  subtotal: number
+  /** Server-computed order total */
+  totalAmount: number
+  /** Optional server-supplied recommendations */
+  recommendedProducts?: ProductSummary[]
+}

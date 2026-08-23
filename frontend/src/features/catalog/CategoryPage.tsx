@@ -8,6 +8,7 @@
 import { useSearchParams, useParams, Link } from 'react-router-dom'
 import * as catalogApi from '../../api/catalogApi'
 import { useAsync } from '../../hooks/useAsync'
+import { useAddToCart } from '../../hooks/useAddToCart'
 import { LoadingSpinner } from '../../components/states/LoadingSpinner'
 import { ErrorState } from '../../components/states/ErrorState'
 import { EmptyState } from '../../components/states/EmptyState'
@@ -18,6 +19,7 @@ import styles from './CategoryPage.module.css'
 export function CategoryPage() {
   const { categoryId } = useParams<{ categoryId: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { addToCart, isAdding, getError } = useAddToCart()
 
   const id = Number(categoryId)
   const page = searchParams.get('page') ? Number(searchParams.get('page')) : 0
@@ -66,7 +68,12 @@ export function CategoryPage() {
       )}
       {!productsState.loading && !productsState.error && productsState.data && productsState.data.content.length > 0 && (
         <>
-          <ProductGrid products={productsState.data.content} />
+          <ProductGrid
+            products={productsState.data.content}
+            onAddToCart={addToCart}
+            isAdding={isAdding}
+            getAddToCartError={getError}
+          />
           <Pagination
             page={productsState.data.page.page}
             totalPages={productsState.data.page.totalPages}

@@ -7,6 +7,7 @@
 import { useSearchParams, useParams, Link } from 'react-router-dom'
 import * as catalogApi from '../../api/catalogApi'
 import { useAsync } from '../../hooks/useAsync'
+import { useAddToCart } from '../../hooks/useAddToCart'
 import { LoadingSpinner } from '../../components/states/LoadingSpinner'
 import { ErrorState } from '../../components/states/ErrorState'
 import { EmptyState } from '../../components/states/EmptyState'
@@ -17,6 +18,7 @@ import styles from './BrandPage.module.css'
 export function BrandPage() {
   const { brandId } = useParams<{ brandId: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
+  const { addToCart, isAdding, getError } = useAddToCart()
 
   const id = Number(brandId)
   const page = searchParams.get('page') ? Number(searchParams.get('page')) : 0
@@ -64,7 +66,12 @@ export function BrandPage() {
       )}
       {!productsState.loading && !productsState.error && productsState.data && productsState.data.content.length > 0 && (
         <>
-          <ProductGrid products={productsState.data.content} />
+          <ProductGrid
+            products={productsState.data.content}
+            onAddToCart={addToCart}
+            isAdding={isAdding}
+            getAddToCartError={getError}
+          />
           <Pagination
             page={productsState.data.page.page}
             totalPages={productsState.data.page.totalPages}

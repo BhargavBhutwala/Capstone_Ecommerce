@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import * as catalogApi from '../../api/catalogApi'
 import { useAsync } from '../../hooks/useAsync'
+import { useAddToCart } from '../../hooks/useAddToCart'
 import { LoadingSpinner } from '../../components/states/LoadingSpinner'
 import { ErrorState } from '../../components/states/ErrorState'
 import { EmptyState } from '../../components/states/EmptyState'
@@ -30,6 +31,7 @@ const DEFAULT_SIZE = 20
 
 export function ProductListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const { addToCart, isAdding, getError } = useAddToCart()
 
   // ── Derive current filter/page state from URL ─────────────────────────────
   const q = searchParams.get('q') ?? ''
@@ -234,7 +236,12 @@ export function ProductListPage() {
         )}
         {!loading && !error && result && result.content.length > 0 && (
           <>
-            <ProductGrid products={result.content} />
+            <ProductGrid
+              products={result.content}
+              onAddToCart={addToCart}
+              isAdding={isAdding}
+              getAddToCartError={getError}
+            />
             <Pagination
               page={result.page.page}
               totalPages={result.page.totalPages}
