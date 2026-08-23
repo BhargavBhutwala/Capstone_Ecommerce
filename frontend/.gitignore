@@ -4,9 +4,18 @@ node_modules/
 # Build output
 dist/
 
+# Test output
+coverage/
+test-results/
+playwright-report/
+
 # Local environment files (never commit these)
 .env.local
 .env.*.local
+
+# Local development logs
+vite-dev.log
+*.log
 
 # Editor directories
 .vscode/
