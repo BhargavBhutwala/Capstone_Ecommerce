@@ -12,6 +12,15 @@ C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\c
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\package-info.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\repository\CartItemRepository.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\repository\CartRepository.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\CatalogMapper.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\controller\BrandController.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\controller\CategoryController.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\controller\ProductController.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\dto\BrandSummary.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\dto\CategorySummary.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\dto\DeliveryEstimate.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\dto\ProductResponse.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\dto\ProductSummary.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\entity\Brand.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\entity\Category.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\entity\Product.java
@@ -19,6 +28,10 @@ C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\c
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\repository\BrandRepository.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\repository\CategoryRepository.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\repository\ProductRepository.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\repository\ProductSpecification.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\service\BrandService.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\service\CategoryService.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\service\ProductService.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\domain\CartStatus.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\domain\OrderStatus.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\domain\PaymentMethod.java
@@ -26,6 +39,8 @@ C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\c
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\domain\UserRole.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\domain\UserStatus.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\dto\ErrorResponse.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\dto\PagedResponse.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\dto\PageMetadata.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\entity\BaseCreatedEntity.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\entity\BaseEntity.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\exception\BusinessRuleViolationException.java
