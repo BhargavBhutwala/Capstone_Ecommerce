@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.ebookstore.catalog.service.ProductServiceTest" time="0.114" tests="15" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.ebookstore.order.service.OrderServiceTest" time="0.261" tests="30" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -58,19 +58,95 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="getProduct_inactive_availableIsFalse" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.017"/>
-  <testcase name="getRelatedProducts_excludesSelf" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.005"/>
-  <testcase name="getRelatedProducts_respectsSizeLimit" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.001"/>
-  <testcase name="searchProducts_withCategoryFilter_callsRepository" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.027"/>
-  <testcase name="getProduct_notFound_throwsResourceNotFoundException" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.003"/>
-  <testcase name="searchProducts_availableOnly_filterApplied" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.004"/>
-  <testcase name="getRelatedProducts_supplementsFromBrand_whenCategoryInsufficient" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.003"/>
-  <testcase name="getRelatedProducts_sourceNotFound_throwsResourceNotFoundException" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.003"/>
-  <testcase name="searchProducts_withPriceFilters_callsRepository" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.003"/>
-  <testcase name="searchProducts_withBrandFilter_callsRepository" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.003"/>
-  <testcase name="getRelatedProducts_returnsSameCategoryFirst" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.011"/>
-  <testcase name="searchProducts_delegatesToRepositoryWithSpec" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.004"/>
-  <testcase name="getRelatedProducts_excludesOutOfStock" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.002"/>
-  <testcase name="getProduct_found_returnsProductResponse" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.002"/>
-  <testcase name="searchProducts_withQFilter_callsRepository" classname="com.ebookstore.catalog.service.ProductServiceTest" time="0.003"/>
+  <testcase name="buyAgain_historicalPriceNotUsed" classname="com.ebookstore.order.service.OrderServiceTest" time="0.09">
+    <system-out><![CDATA[12:30:19.432 [main] INFO com.ebookstore.order.service.OrderService -- buyAgain: added 1 products to cart for userId=10, orderId=500
+]]></system-out>
+  </testcase>
+  <testcase name="createOrder_shippingAddressSnapshot_isPersistedOnOrder" classname="com.ebookstore.order.service.OrderServiceTest" time="0.019">
+    <system-out><![CDATA[12:30:19.441 [main] INFO com.ebookstore.order.service.OrderService -- Order created: orderId=500, orderNumber=ORD-337C97B347E6, userId=10, total=10.00
+]]></system-out>
+  </testcase>
+  <testcase name="createOrder_addressNotFound_throwsResourceNotFoundException" classname="com.ebookstore.order.service.OrderServiceTest" time="0.004"/>
+  <testcase name="createOrder_cartItemsCleared_andCartStatusRemainsActive" classname="com.ebookstore.order.service.OrderServiceTest" time="0.007">
+    <system-out><![CDATA[12:30:19.463 [main] INFO com.ebookstore.order.service.OrderService -- Order created: orderId=500, orderNumber=ORD-D53B3E28C019, userId=10, total=10.00
+]]></system-out>
+  </testcase>
+  <testcase name="cancelOrder_pendingPayment_withinDeadline_cancels" classname="com.ebookstore.order.service.OrderServiceTest" time="0.006">
+    <system-out><![CDATA[12:30:19.471 [main] INFO com.ebookstore.order.service.OrderService -- Order cancelled: orderId=500, orderNumber=ORD-TEST500, userId=10
+]]></system-out>
+  </testcase>
+  <testcase name="createOrder_giftPointsAndDiscountAreZero" classname="com.ebookstore.order.service.OrderServiceTest" time="0.007">
+    <system-out><![CDATA[12:30:19.477 [main] INFO com.ebookstore.order.service.OrderService -- Order created: orderId=500, orderNumber=ORD-C65E72C46282, userId=10, total=10.00
+]]></system-out>
+  </testcase>
+  <testcase name="createOrder_orderItemTitleIsSnapshotted" classname="com.ebookstore.order.service.OrderServiceTest" time="0.006">
+    <system-out><![CDATA[12:30:19.485 [main] INFO com.ebookstore.order.service.OrderService -- Order created: orderId=500, orderNumber=ORD-2A3318232F28, userId=10, total=44.99
+]]></system-out>
+  </testcase>
+  <testcase name="cancelOrder_paid_withinDeadline_cancelsAndRestoresStock" classname="com.ebookstore.order.service.OrderServiceTest" time="0.003">
+    <system-out><![CDATA[12:30:19.488 [main] INFO com.ebookstore.order.service.OrderService -- Order cancelled: orderId=500, orderNumber=ORD-TEST500, userId=10
+]]></system-out>
+  </testcase>
+  <testcase name="createOrder_stockDecremented" classname="com.ebookstore.order.service.OrderServiceTest" time="0.005">
+    <system-out><![CDATA[12:30:19.493 [main] INFO com.ebookstore.order.service.OrderService -- Order created: orderId=500, orderNumber=ORD-50E3E4187BDE, userId=10, total=20.00
+]]></system-out>
+  </testcase>
+  <testcase name="createOrder_noPaymentCreated" classname="com.ebookstore.order.service.OrderServiceTest" time="0.007">
+    <system-out><![CDATA[12:30:19.501 [main] INFO com.ebookstore.order.service.OrderService -- Order created: orderId=500, orderNumber=ORD-4C6D92F30720, userId=10, total=10.00
+]]></system-out>
+  </testcase>
+  <testcase name="createOrder_inactiveProduct_throwsBusinessRuleViolationException" classname="com.ebookstore.order.service.OrderServiceTest" time="0.004"/>
+  <testcase name="createOrder_orderItemUsesLivePriceSnapshot" classname="com.ebookstore.order.service.OrderServiceTest" time="0.005">
+    <system-out><![CDATA[12:30:19.512 [main] INFO com.ebookstore.order.service.OrderService -- Order created: orderId=500, orderNumber=ORD-817F8F5D7009, userId=10, total=49.99
+]]></system-out>
+  </testcase>
+  <testcase name="buyAgain_someUnavailable_skipsUnavailableAddsAvailable" classname="com.ebookstore.order.service.OrderServiceTest" time="0.006">
+    <system-out><![CDATA[12:30:19.518 [main] INFO com.ebookstore.order.service.OrderService -- buyAgain: product 301 unavailable (active=true, stock=0) — skipping
+12:30:19.519 [main] INFO com.ebookstore.order.service.OrderService -- buyAgain: added 1 products to cart for userId=10, orderId=500
+]]></system-out>
+  </testcase>
+  <testcase name="cancelOrder_stockRestoredForAllItems" classname="com.ebookstore.order.service.OrderServiceTest" time="0.002">
+    <system-out><![CDATA[12:30:19.523 [main] INFO com.ebookstore.order.service.OrderService -- Order cancelled: orderId=500, orderNumber=ORD-TEST500, userId=10
+]]></system-out>
+  </testcase>
+  <testcase name="createOrder_successful_createsOrderWithPendingPaymentStatus" classname="com.ebookstore.order.service.OrderServiceTest" time="0.004">
+    <system-out><![CDATA[12:30:19.527 [main] INFO com.ebookstore.order.service.OrderService -- Order created: orderId=500, orderNumber=ORD-8D49C96CF56A, userId=10, total=59.98
+]]></system-out>
+  </testcase>
+  <testcase name="createOrder_subtotalAndTotalsCalculatedFromLivePrice" classname="com.ebookstore.order.service.OrderServiceTest" time="0.006">
+    <system-out><![CDATA[12:30:19.534 [main] INFO com.ebookstore.order.service.OrderService -- Order created: orderId=500, orderNumber=ORD-6202A619A497, userId=10, total=80.00
+]]></system-out>
+  </testcase>
+  <testcase name="listOrders_returnsPagedResponse_sortedByPlacedAtDesc" classname="com.ebookstore.order.service.OrderServiceTest" time="0.005"/>
+  <testcase name="buyAgain_allUnavailable_throwsBusinessRuleViolationException" classname="com.ebookstore.order.service.OrderServiceTest" time="0.003">
+    <system-out><![CDATA[12:30:19.544 [main] INFO com.ebookstore.order.service.OrderService -- buyAgain: product 300 unavailable (active=true, stock=0) — skipping
+]]></system-out>
+  </testcase>
+  <testcase name="cancelOrder_confirmedStatus_throwsOrderCancellationNotAllowedException" classname="com.ebookstore.order.service.OrderServiceTest" time="0.004"/>
+  <testcase name="createOrder_emptyCart_throwsInvalidRequestException" classname="com.ebookstore.order.service.OrderServiceTest" time="0.002"/>
+  <testcase name="createOrder_usesLiveProductPrice_notCartUnitPrice" classname="com.ebookstore.order.service.OrderServiceTest" time="0.004">
+    <system-out><![CDATA[12:30:19.556 [main] INFO com.ebookstore.order.service.OrderService -- Order created: orderId=500, orderNumber=ORD-2202BC4F0283, userId=10, total=59.98
+]]></system-out>
+  </testcase>
+  <testcase name="getOrder_anotherUsersOrder_throwsResourceNotFoundException" classname="com.ebookstore.order.service.OrderServiceTest" time="0.003"/>
+  <testcase name="cancelOrder_paidOrder_paymentStatusUnchanged" classname="com.ebookstore.order.service.OrderServiceTest" time="0.003">
+    <system-out><![CDATA[12:30:19.564 [main] INFO com.ebookstore.order.service.OrderService -- Order cancelled: orderId=500, orderNumber=ORD-TEST500, userId=10
+]]></system-out>
+  </testcase>
+  <testcase name="createOrder_cancellationDeadlineIs48HoursAfterPlacedAt" classname="com.ebookstore.order.service.OrderServiceTest" time="0.009">
+    <system-out><![CDATA[12:30:19.569 [main] INFO com.ebookstore.order.service.OrderService -- Order created: orderId=500, orderNumber=ORD-C3FFB96946F0, userId=10, total=10.00
+]]></system-out>
+  </testcase>
+  <testcase name="cancelOrder_afterDeadline_throwsOrderCancellationNotAllowedException" classname="com.ebookstore.order.service.OrderServiceTest" time="0.004"/>
+  <testcase name="listOrders_withStatusFilter_usesFilteredQuery" classname="com.ebookstore.order.service.OrderServiceTest" time="0.004"/>
+  <testcase name="createOrder_insufficientStock_throwsInsufficientStockException" classname="com.ebookstore.order.service.OrderServiceTest" time="0.004"/>
+  <testcase name="buyAgain_allAvailable_addsToCartUsingCurrentPrice" classname="com.ebookstore.order.service.OrderServiceTest" time="0.004">
+    <system-out><![CDATA[12:30:19.592 [main] INFO com.ebookstore.order.service.OrderService -- buyAgain: added 1 products to cart for userId=10, orderId=500
+]]></system-out>
+  </testcase>
+  <testcase name="cancelOrder_exactlyAtDeadline_isAllowed" classname="com.ebookstore.order.service.OrderServiceTest" time="0.004">
+    <system-out><![CDATA[12:30:19.597 [main] INFO com.ebookstore.order.service.OrderService -- Order cancelled: orderId=500, orderNumber=ORD-TEST500, userId=10
+]]></system-out>
+  </testcase>
+  <testcase name="getOrder_ownOrder_returnsOrderResponse" classname="com.ebookstore.order.service.OrderServiceTest" time="0.001"/>
 </testsuite>
