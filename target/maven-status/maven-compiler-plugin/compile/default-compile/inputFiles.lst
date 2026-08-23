@@ -1,6 +1,10 @@
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\address\controller\AddressController.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\address\dto\AddressRequest.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\address\dto\AddressResponse.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\address\entity\Address.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\address\package-info.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\address\repository\AddressRepository.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\address\service\AddressService.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\auth\controller\AuthController.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\auth\dto\LoginRequest.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\auth\dto\LoginResponse.java

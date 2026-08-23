@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.628" tests="15" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.ebookstore.address.service.AddressServiceTest" time="1.98" tests="8" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -58,19 +58,19 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="hasPriceAtLeast_buildsPredicate" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.522"/>
-  <testcase name="hasTitleContaining_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.007"/>
-  <testcase name="buildSearch_composition_isNonNull" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.011"/>
-  <testcase name="hasPriceAtMost_buildsPredicate" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.009"/>
-  <testcase name="hasTitleContaining_buildsPredicate" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.008"/>
-  <testcase name="buildSearch_withNullParams_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.01"/>
-  <testcase name="isAvailable_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.005"/>
-  <testcase name="hasBrand_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.004"/>
-  <testcase name="hasPriceAtLeast_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.006"/>
-  <testcase name="isAvailable_buildsPredicate" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.004"/>
-  <testcase name="isActive_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.004"/>
-  <testcase name="buildSearch_withQ_returnsNonNullPredicateViaTitle" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.008"/>
-  <testcase name="hasCategory_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.005"/>
-  <testcase name="buildSearch_withAllNulls_involvesNoPredicates" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.007"/>
-  <testcase name="hasPriceAtMost_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.006"/>
+  <testcase name="updateAddress_throwsResourceNotFoundException_whenAddressNotFound" classname="com.ebookstore.address.service.AddressServiceTest" time="1.843">
+    <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\BhargavBhutwala\.m2\repository\net\bytebuddy\byte-buddy-agent\1.15.11\byte-buddy-agent-1.15.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+  </testcase>
+  <testcase name="deleteAddress_deletesAddress_whenFound" classname="com.ebookstore.address.service.AddressServiceTest" time="0.016"/>
+  <testcase name="updateAddress_updatesAndReturnsAddressResponse" classname="com.ebookstore.address.service.AddressServiceTest" time="0.029"/>
+  <testcase name="deleteAddress_throwsResourceNotFoundException_whenAddressNotFound" classname="com.ebookstore.address.service.AddressServiceTest" time="0.004"/>
+  <testcase name="createAddress_setsAllRequestFieldsOnEntity" classname="com.ebookstore.address.service.AddressServiceTest" time="0.013"/>
+  <testcase name="createAddress_savesAndReturnsAddressResponse" classname="com.ebookstore.address.service.AddressServiceTest" time="0.012"/>
+  <testcase name="listAddresses_returnsAllAddressesForUser" classname="com.ebookstore.address.service.AddressServiceTest" time="0.015"/>
+  <testcase name="listAddresses_returnsEmptyList_whenUserHasNoAddresses" classname="com.ebookstore.address.service.AddressServiceTest" time="0.003"/>
 </testsuite>
