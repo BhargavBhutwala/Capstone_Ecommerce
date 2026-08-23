@@ -23,6 +23,7 @@ import { CartPage } from '../features/cart/CartPage'
 import { AddressesPage } from '../features/address/AddressesPage'
 import { CheckoutPage } from '../features/checkout/CheckoutPage'
 import { OrdersPage } from '../features/orders/OrdersPage'
+import { OrderDetailPage } from '../features/orders/OrderDetailPage'
 import { PaymentPage } from '../features/payment/PaymentPage'
 
 export const router = createBrowserRouter([
@@ -56,7 +57,7 @@ export const router = createBrowserRouter([
           { path: 'addresses', element: <AddressesPage /> },
           { path: 'checkout', element: <CheckoutPage /> },
           { path: 'orders', element: <OrdersPage /> },
-          // FE-07: /orders/:orderId
+          { path: 'orders/:orderId', element: <OrderDetailPage /> },
           { path: 'orders/:orderId/payment', element: <PaymentPage /> },
         ],
       },

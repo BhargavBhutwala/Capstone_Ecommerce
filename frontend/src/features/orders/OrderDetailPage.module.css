@@ -1,0 +1,339 @@
+/* OrderDetailPage styles */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Breadcrumb ───────────────────────────────────────────────────────────── */
+
+.breadcrumb {
+  font-size: 0.85rem;
+  color: #57606a;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.breadcrumb a {
+  color: #3b82d4;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbCurrent {
+  color: #1f2328;
+  font-weight: 500;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.heading {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1f2328;
+  margin: 0 0 0.25rem;
+}
+
+.placedAt {
+  font-size: 0.875rem;
+  color: #57606a;
+  margin: 0;
+}
+
+/* ── Status badge ─────────────────────────────────────────────────────────── */
+
+.statusBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 5px;
+  padding: 0.25rem 0.7rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: #f3f4f6;
+  color: #57606a;
+}
+
+.status_PENDING_PAYMENT { background: #fef9c3; color: #92400e; }
+.status_PAID, .status_CONFIRMED, .status_DELIVERED { background: #dcfce7; color: #15803d; }
+.status_SHIPPED { background: #dbeafe; color: #1d4ed8; }
+.status_CANCELLED, .status_REFUNDED { background: #fee2e2; color: #b91c1c; }
+.status_RETURN_REQUESTED, .status_RETURNED { background: #fef3c7; color: #b45309; }
+
+/* ── Actions bar ──────────────────────────────────────────────────────────── */
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.actionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.actionError {
+  font-size: 0.8rem;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 5px;
+  padding: 0.3rem 0.625rem;
+  margin: 0;
+  max-width: 280px;
+}
+
+.buyAgainBtn {
+  background: #3b82d4;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.buyAgainBtn:hover:not(:disabled) {
+  background: #2563b8;
+}
+
+.buyAgainBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancelBtn {
+  background: none;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 6px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.cancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Two-column body layout ──────────────────────────────────────────────── */
+
+.body {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Items section ────────────────────────────────────────────────────────── */
+
+.sectionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1f2328;
+  margin: 0 0 1rem;
+}
+
+.itemsSection {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.itemList {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.itemHeader {
+  display: grid;
+  grid-template-columns: 1fr 60px 100px 100px;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #57606a;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.itemRow {
+  display: grid;
+  grid-template-columns: 1fr 60px 100px 100px;
+  gap: 0.5rem;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid #f3f4f6;
+  align-items: baseline;
+}
+
+.itemRow:last-child {
+  border-bottom: none;
+}
+
+.itemTitle {
+  font-size: 0.875rem;
+  color: #1f2328;
+  font-weight: 500;
+}
+
+.colRight {
+  text-align: right;
+  font-size: 0.875rem;
+  color: #57606a;
+}
+
+/* ── Totals ───────────────────────────────────────────────────────────────── */
+
+.totals {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #1f2328;
+}
+
+.grandTotal {
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding-top: 0.25rem;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 0.25rem;
+}
+
+/* ── Meta sidebar ─────────────────────────────────────────────────────────── */
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.metaCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.metaTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1f2328;
+  margin: 0;
+}
+
+.address {
+  font-style: normal;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.address p {
+  font-size: 0.875rem;
+  color: #57606a;
+  margin: 0;
+}
+
+.infoList {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 1rem;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.infoList dt {
+  color: #57606a;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.infoList dd {
+  color: #1f2328;
+  margin: 0;
+  word-break: break-word;
+}
+
+/* ── Not found ────────────────────────────────────────────────────────────── */
+
+.notFound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1rem;
+  text-align: center;
+}
+
+.notFoundCode {
+  font-size: 6rem;
+  font-weight: 800;
+  color: #e5e7eb;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.notFoundMsg {
+  font-size: 1.125rem;
+  color: #57606a;
+  margin-bottom: 1.25rem;
+}
+
+.backLink {
+  color: #3b82d4;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
