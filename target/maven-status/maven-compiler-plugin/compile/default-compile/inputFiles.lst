@@ -20,8 +20,17 @@ C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\c
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\domain\PaymentStatus.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\domain\UserRole.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\domain\UserStatus.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\dto\ErrorResponse.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\entity\BaseCreatedEntity.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\entity\BaseEntity.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\exception\BusinessRuleViolationException.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\exception\DuplicatePaymentException.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\exception\GlobalExceptionHandler.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\exception\InsufficientStockException.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\exception\InvalidRequestException.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\exception\OrderCancellationNotAllowedException.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\exception\ResourceNotFoundException.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\exception\UnauthorizedResourceAccessException.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\common\package-info.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\config\package-info.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\EbookstoreApplication.java
