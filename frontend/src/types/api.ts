@@ -252,6 +252,36 @@ export interface OrderResponse {
   cancellationDeadline?: string | null
 }
 
+// ─── Payments ─────────────────────────────────────────────────────────────────
+
+/** Exact enum values from OpenAPI contract — only CREDIT_CARD and DEBIT_CARD are MVP */
+export type PaymentMethod = 'CREDIT_CARD' | 'DEBIT_CARD'
+
+export type PaymentStatus = 'INITIATED' | 'PROCESSING' | 'SUCCESS' | 'FAILED' | 'REFUNDED'
+
+/** POST /payments request body — operationId: initiatePayment */
+export interface CreatePaymentRequest {
+  /** ID of the order to pay for */
+  orderId: number
+  paymentMethod: PaymentMethod
+}
+
+/**
+ * Payment status payload — operationId: initiatePayment / getPayment
+ * Amount is set by the backend from the authoritative order total.
+ */
+export interface PaymentResponse {
+  id: number
+  orderId: number
+  paymentReference: string
+  paymentMethod: PaymentMethod
+  /** Backend-computed amount — BigDecimal-sourced, render with 2 dp */
+  amount: number
+  status: PaymentStatus
+  /** ISO-8601 datetime string, null until payment succeeds */
+  paidAt?: string | null
+}
+
 /**
  * Full cart payload returned by getCart, addCartItem, updateCartItem.
  * operationId: getCart

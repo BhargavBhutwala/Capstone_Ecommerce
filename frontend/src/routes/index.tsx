@@ -23,7 +23,7 @@ import { CartPage } from '../features/cart/CartPage'
 import { AddressesPage } from '../features/address/AddressesPage'
 import { CheckoutPage } from '../features/checkout/CheckoutPage'
 import { OrdersPage } from '../features/orders/OrdersPage'
-import { PaymentPlaceholder } from '../features/payment/PaymentPlaceholder'
+import { PaymentPage } from '../features/payment/PaymentPage'
 
 export const router = createBrowserRouter([
   {
@@ -57,8 +57,7 @@ export const router = createBrowserRouter([
           { path: 'checkout', element: <CheckoutPage /> },
           { path: 'orders', element: <OrdersPage /> },
           // FE-07: /orders/:orderId
-          // FE-06: /orders/:orderId/payment — placeholder only until FE-06
-          { path: 'orders/:orderId/payment', element: <PaymentPlaceholder /> },
+          { path: 'orders/:orderId/payment', element: <PaymentPage /> },
         ],
       },
 

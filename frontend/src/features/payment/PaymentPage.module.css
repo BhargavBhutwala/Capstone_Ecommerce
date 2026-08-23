@@ -1,0 +1,270 @@
+/* PaymentPage styles */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.heading {
+  font-size: 1.625rem;
+  font-weight: 800;
+  color: #1f2328;
+  margin: 0;
+}
+
+.orderRef {
+  font-size: 0.9rem;
+  color: #57606a;
+  margin: 0;
+}
+
+/* ── Payment form card ────────────────────────────────────────────────────── */
+
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.sectionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1f2328;
+  margin: 0;
+}
+
+.simNote {
+  font-size: 0.8rem;
+  color: #8b949e;
+  background: #f7f8fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+}
+
+/* ── Payment method selection ─────────────────────────────────────────────── */
+
+.methodGroup {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.methodLegend {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #57606a;
+  margin-bottom: 0.5rem;
+}
+
+.methodOption {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.methodOption:hover {
+  border-color: #93c5fd;
+}
+
+.methodSelected {
+  border-color: #3b82d4;
+  background: #eff6ff;
+}
+
+.methodRadio {
+  accent-color: #3b82d4;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.methodLabel {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1f2328;
+}
+
+/* ── Error / info notes ───────────────────────────────────────────────────── */
+
+.errorNote {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 6px;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* ── Pay button ───────────────────────────────────────────────────────────── */
+
+.payBtn {
+  width: 100%;
+  background: #1a1a2e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.payBtn:hover:not(:disabled) {
+  background: #2d2d44;
+}
+
+.payBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.backNote {
+  font-size: 0.8rem;
+  text-align: center;
+  color: #57606a;
+  margin: 0;
+}
+
+.backNote a {
+  color: #3b82d4;
+  text-decoration: none;
+}
+
+.backNote a:hover {
+  text-decoration: underline;
+}
+
+/* ── Payment result panel ─────────────────────────────────────────────────── */
+
+.result {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.resultSuccess {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.resultFailed {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.resultPending {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.resultStatus {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.resultSuccess .resultStatus {
+  color: #15803d;
+}
+
+.resultFailed .resultStatus {
+  color: #dc2626;
+}
+
+.resultPending .resultStatus {
+  color: #92400e;
+}
+
+/* Definition list for payment details */
+.resultDetails {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.375rem 1.25rem;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.resultDetails dt {
+  color: #57606a;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.resultDetails dd {
+  color: #1f2328;
+  margin: 0;
+  font-weight: 500;
+}
+
+.resultActions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ordersLink {
+  display: inline-block;
+  background: #1a1a2e;
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.ordersLink:hover {
+  background: #2d2d44;
+}
+
+.failedNote {
+  font-size: 0.875rem;
+  color: #dc2626;
+  margin: 0;
+}
+
+.refreshBtn {
+  background: none;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  border-radius: 6px;
+  padding: 0.4rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  background: #fef9c3;
+}
+
+.refreshBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
