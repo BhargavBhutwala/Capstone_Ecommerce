@@ -1,17 +1,9 @@
 package com.ebookstore.address;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
+import com.ebookstore.util.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.testcontainers.DockerClientFactory;
 
 import java.util.Map;
 
@@ -27,23 +19,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Integration tests for address CRUD endpoints.
  *
- * <p>Spins up a real PostgreSQL container via Testcontainers.
- * Skipped automatically when Docker is unavailable.
+ * <p>Uses the shared Testcontainers PostgreSQL from {@link AbstractIntegrationTest}.
+ * Database is cleaned and re-seeded before each test.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class AddressControllerIT {
-
-    @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper objectMapper;
-
-    @BeforeAll
-    static void requireDocker() {
-        Assumptions.assumeTrue(
-                DockerClientFactory.instance().isDockerAvailable(),
-                "Skipping integration tests: Docker is not available on this machine.");
-    }
+class AddressControllerIT extends AbstractIntegrationTest {
 
     // =========================================================================
     // GET /addresses — list
@@ -51,8 +30,7 @@ class AddressControllerIT {
 
     @Test
     void listAddresses_withValidToken_returnsOwnAddresses() throws Exception {
-        String email = "addr_list@example.com";
-        String token = registerAndLogin(email);
+        String token = registerAndLogin("addr_list@example.com");
 
         // No addresses yet
         mockMvc.perform(get("/addresses")
@@ -61,7 +39,7 @@ class AddressControllerIT {
                 .andExpect(jsonPath("$", hasSize(0)));
 
         // Create one
-        createAddress(token, "123 A St", "Home");
+        createNamedAddress(token, "123 A St", "Home");
 
         mockMvc.perform(get("/addresses")
                         .header("Authorization", "Bearer " + token))
@@ -103,6 +81,7 @@ class AddressControllerIT {
     void createAddress_missingRequiredField_returns400WithFieldErrors() throws Exception {
         String token = registerAndLogin("addr_invalid@example.com");
 
+        // Missing addressLine1
         String body = """
                 {
                   "label": "Home",
@@ -121,6 +100,14 @@ class AddressControllerIT {
                 .andExpect(jsonPath("$.fieldErrors", notNullValue()));
     }
 
+    @Test
+    void createAddress_unauthenticated_returns401() throws Exception {
+        mockMvc.perform(post("/addresses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(buildAddressJson("456 Oak Ave", "Office")))
+                .andExpect(status().isUnauthorized());
+    }
+
     // =========================================================================
     // PUT /addresses/{addressId} — update
     // =========================================================================
@@ -128,14 +115,12 @@ class AddressControllerIT {
     @Test
     void updateAddress_ownAddress_returns200WithUpdatedData() throws Exception {
         String token = registerAndLogin("addr_update@example.com");
-        Long addressId = createAddress(token, "789 Pine St", "Home");
-
-        String updated = buildAddressJson("999 Updated Rd", "Updated");
+        long addressId = createNamedAddress(token, "789 Pine St", "Home");
 
         mockMvc.perform(put("/addresses/" + addressId)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(updated))
+                        .content(buildAddressJson("999 Updated Rd", "Updated")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.addressLine1").value("999 Updated Rd"))
                 .andExpect(jsonPath("$.label").value("Updated"));
@@ -144,7 +129,7 @@ class AddressControllerIT {
     @Test
     void updateAddress_anotherUsersAddress_returns404() throws Exception {
         String ownerToken = registerAndLogin("addr_owner@example.com");
-        Long addressId = createAddress(ownerToken, "100 Owner St", "Home");
+        long addressId = createNamedAddress(ownerToken, "100 Owner St", "Home");
 
         String otherToken = registerAndLogin("addr_other@example.com");
 
@@ -163,7 +148,7 @@ class AddressControllerIT {
     @Test
     void deleteAddress_ownAddress_returns204() throws Exception {
         String token = registerAndLogin("addr_delete@example.com");
-        Long addressId = createAddress(token, "555 Delete Me", "Temp");
+        long addressId = createNamedAddress(token, "555 Delete Me", "Temp");
 
         mockMvc.perform(delete("/addresses/" + addressId)
                         .header("Authorization", "Bearer " + token))
@@ -179,7 +164,7 @@ class AddressControllerIT {
     @Test
     void deleteAddress_anotherUsersAddress_returns404() throws Exception {
         String ownerToken = registerAndLogin("addr_del_owner@example.com");
-        Long addressId = createAddress(ownerToken, "200 Owner St", "Home");
+        long addressId = createNamedAddress(ownerToken, "200 Owner St", "Home");
 
         String otherToken = registerAndLogin("addr_del_other@example.com");
 
@@ -193,38 +178,7 @@ class AddressControllerIT {
     // Helpers
     // =========================================================================
 
-    private String registerAndLogin(String email) throws Exception {
-        String body = String.format("""
-                {
-                  "firstName": "Test",
-                  "lastName": "User",
-                  "email": "%s",
-                  "password": "password123"
-                }
-                """, email);
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated());
-
-        String loginBody = String.format("""
-                {
-                  "email": "%s",
-                  "password": "password123"
-                }
-                """, email);
-        MvcResult result = mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(loginBody))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        Map<?, ?> response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), Map.class);
-        return (String) response.get("accessToken");
-    }
-
-    private Long createAddress(String token, String addressLine1, String label) throws Exception {
+    private long createNamedAddress(String token, String addressLine1, String label) throws Exception {
         MvcResult result = mockMvc.perform(post("/addresses")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)

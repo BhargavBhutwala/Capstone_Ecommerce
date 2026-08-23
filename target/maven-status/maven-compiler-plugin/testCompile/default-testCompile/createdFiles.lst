@@ -7,9 +7,12 @@ com\ebookstore\payment\service\PaymentServiceTest.class
 com\ebookstore\auth\service\AuthServiceTest$2.class
 com\ebookstore\address\service\AddressServiceTest.class
 com\ebookstore\auth\service\AuthServiceTest.class
+com\ebookstore\util\ClockTestConfig.class
 com\ebookstore\security\JwtTokenProviderTest.class
 com\ebookstore\cart\service\CartServiceTest.class
+com\ebookstore\common\exception\GlobalExceptionHandlerTest$TestExceptionController$Color.class
 com\ebookstore\security\UserDetailsServiceImplTest.class
+com\ebookstore\util\AbstractIntegrationTest.class
 com\ebookstore\order\service\OrderServiceTest$8.class
 com\ebookstore\auth\service\AuthServiceTest$1.class
 com\ebookstore\catalog\repository\ProductSpecificationTest.class
@@ -17,7 +20,9 @@ com\ebookstore\order\service\OrderServiceTest$3.class
 com\ebookstore\auth\AuthControllerIT.class
 com\ebookstore\catalog\service\ProductServiceTest.class
 com\ebookstore\order\OrderControllerIT.class
+com\ebookstore\SpringdocIT.class
 com\ebookstore\catalog\CatalogControllerIT.class
+com\ebookstore\security\SecurityIT.class
 com\ebookstore\order\service\OrderServiceTest$6.class
 com\ebookstore\order\service\OrderServiceTest$4.class
 com\ebookstore\address\AddressControllerIT.class
@@ -31,3 +36,4 @@ com\ebookstore\common\exception\GlobalExceptionHandlerTest.class
 com\ebookstore\order\service\OrderServiceTest$2.class
 com\ebookstore\user\service\UserServiceTest.class
 com\ebookstore\order\service\OrderServiceTest$7.class
+com\ebookstore\common\exception\GlobalExceptionHandlerTest$TestExceptionController$EnumRequest.class

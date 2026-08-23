@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -83,6 +85,32 @@ public class GlobalExceptionHandler {
 
         log.warn("Business rule violation: {}", ex.getMessage());
         return build(HttpStatus.CONFLICT, "BUSINESS_RULE_VIOLATION", ex.getMessage(), request);
+    }
+
+    // -------------------------------------------------------------------------
+    // 400 Bad Request — malformed/unreadable request body (e.g. invalid enum value)
+    // -------------------------------------------------------------------------
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+
+        log.warn("Malformed request body on {}: {}", request.getRequestURI(), ex.getMessage());
+        return build(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST",
+                "Request body is malformed or contains an invalid value.", request);
+    }
+
+    // -------------------------------------------------------------------------
+    // 401 Unauthorized — invalid credentials
+    // -------------------------------------------------------------------------
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleBadCredentials(
+            BadCredentialsException ex, HttpServletRequest request) {
+
+        log.warn("Invalid credentials attempt on {}", request.getRequestURI());
+        return build(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS",
+                "Invalid email or password.", request);
     }
 
     // -------------------------------------------------------------------------

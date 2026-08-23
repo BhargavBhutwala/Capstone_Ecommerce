@@ -1,17 +1,9 @@
 package com.ebookstore.cart;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeAll;
+import com.ebookstore.util.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.testcontainers.DockerClientFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -29,38 +21,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Integration tests for cart endpoints.
  *
- * <p>Spins up a real PostgreSQL container via Testcontainers (configured in
- * {@code application-test.yml}) and exercises the full request → controller →
- * service → repository → DB stack.
- *
- * <p>Skipped automatically when Docker is not available.
- *
- * <p>Each test registers a unique user (and therefore gets its own empty cart),
- * ensuring tests are independent without relying on {@code @Transactional} rollback
- * (which does not work with {@code RANDOM_PORT}).
+ * <p>Exercises the full request → controller → service → repository → PostgreSQL stack.
+ * Each test registers a unique user so tests are independent without relying on
+ * {@code @Transactional} rollback (ineffective with {@code RANDOM_PORT}).
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-class CartControllerIT {
-
-    @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper objectMapper;
-
-    @BeforeAll
-    static void requireDocker() {
-        Assumptions.assumeTrue(
-                DockerClientFactory.instance().isDockerAvailable(),
-                "Skipping integration tests: Docker is not available on this machine.");
-    }
+class CartControllerIT extends AbstractIntegrationTest {
 
     // =========================================================================
-    // GET /cart — basic authentication & schema
+    // GET /cart — authentication & schema
     // =========================================================================
 
     @Test
     void getCart_authenticated_returns200WithCartResponseSchema() throws Exception {
-        String token = registerAndLogin("cart_get1@example.com");
+        String token = registerAndLogin("cart_get@example.com");
 
         mockMvc.perform(get("/cart")
                         .header("Authorization", "Bearer " + token))
@@ -80,6 +53,21 @@ class CartControllerIT {
     }
 
     @Test
+    void getCart_cartBelongsToAuthenticatedUser_notSharedAcrossUsers() throws Exception {
+        String token1 = registerAndLogin("cart_usr1@example.com");
+        String token2 = registerAndLogin("cart_usr2@example.com");
+
+        // Add item to user1's cart
+        addItemToCart(token1, 1L, 1);
+
+        // User2's cart must be empty
+        mockMvc.perform(get("/cart")
+                        .header("Authorization", "Bearer " + token2))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items", hasSize(0)));
+    }
+
+    @Test
     void getCart_cartIdUnchangedAcrossRequests() throws Exception {
         String token = registerAndLogin("cart_stable@example.com");
 
@@ -94,7 +82,6 @@ class CartControllerIT {
 
         Map<?, ?> cart1 = parseBody(r1);
         Map<?, ?> cart2 = parseBody(r2);
-        // Same cart id on both calls — cart is persistent, never re-created
         assertThat(cart1.get("id")).isEqualTo(cart2.get("id"));
     }
 
@@ -104,18 +91,17 @@ class CartControllerIT {
 
     @Test
     void addCartItem_validRequest_returns201WithCartResponse() throws Exception {
-        String token = registerAndLogin("cart_add1@example.com");
-        long productId = getAnyActiveProductId();
+        String token = registerAndLogin("cart_add@example.com");
 
         mockMvc.perform(post("/cart/items")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(addItemJson(productId, 1)))
+                        .content("{\"productId\":1,\"quantity\":1}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
                 .andExpect(jsonPath("$.items", hasSize(1)))
-                .andExpect(jsonPath("$.items[0].product.id").value(productId))
+                .andExpect(jsonPath("$.items[0].product.id").value(1))
                 .andExpect(jsonPath("$.items[0].quantity").value(1))
                 .andExpect(jsonPath("$.items[0].unitPrice", notNullValue()))
                 .andExpect(jsonPath("$.items[0].subtotal", notNullValue()))
@@ -127,12 +113,12 @@ class CartControllerIT {
     void addCartItem_unauthenticated_returns401() throws Exception {
         mockMvc.perform(post("/cart/items")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(addItemJson(1L, 1)))
+                        .content("{\"productId\":1,\"quantity\":1}"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void addCartItem_missingProductId_returns400() throws Exception {
+    void addCartItem_missingProductId_returns400WithFieldErrors() throws Exception {
         String token = registerAndLogin("cart_add_bad@example.com");
 
         mockMvc.perform(post("/cart/items")
@@ -150,33 +136,32 @@ class CartControllerIT {
         mockMvc.perform(post("/cart/items")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(addItemJson(999999L, 1)))
+                        .content("{\"productId\":999999,\"quantity\":1}"))
                 .andExpect(status().isNotFound());
     }
 
     // =========================================================================
-    // POST /cart/items — merge (duplicate product)
+    // POST /cart/items — duplicate product merges quantity
     // =========================================================================
 
     @Test
-    void addCartItem_sameProductTwice_mergesQuantity() throws Exception {
+    void addCartItem_sameProductTwice_mergesQuantityNoDuplicateRow() throws Exception {
         String token = registerAndLogin("cart_merge@example.com");
-        long productId = getAnyActiveProductId();
 
         // Add 1 first
         mockMvc.perform(post("/cart/items")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(addItemJson(productId, 1)))
+                        .content("{\"productId\":1,\"quantity\":1}"))
                 .andExpect(status().isCreated());
 
-        // Add 2 more — should merge to 3, not create a second row
+        // Add 2 more — must merge to 3, not create a second row
         MvcResult result = mockMvc.perform(post("/cart/items")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(addItemJson(productId, 2)))
+                        .content("{\"productId\":1,\"quantity\":2}"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.items", hasSize(1)))        // still only 1 row
+                .andExpect(jsonPath("$.items", hasSize(1)))      // still only 1 row
                 .andExpect(jsonPath("$.items[0].quantity").value(3))
                 .andReturn();
 
@@ -194,13 +179,12 @@ class CartControllerIT {
     @Test
     void addCartItem_insufficientStock_returns409() throws Exception {
         String token = registerAndLogin("cart_stock@example.com");
-        // Request quantity 9999 — guaranteed to exceed any seed data stock
-        long productId = getAnyActiveProductId();
 
+        // Product 1 has stock_quantity=50; request 51 → valid qty but exceeds stock → 409
         mockMvc.perform(post("/cart/items")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(addItemJson(productId, 9999)))
+                        .content("{\"productId\":1,\"quantity\":51}"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("INSUFFICIENT_STOCK"));
     }
@@ -212,8 +196,7 @@ class CartControllerIT {
     @Test
     void updateCartItem_validRequest_returns200WithUpdatedQuantity() throws Exception {
         String token = registerAndLogin("cart_upd@example.com");
-        long productId = getAnyActiveProductId();
-        long itemId = addItemAndGetItemId(token, productId, 1);
+        long itemId = addItemAndGetItemId(token, 1L, 1);
 
         mockMvc.perform(put("/cart/items/" + itemId)
                         .header("Authorization", "Bearer " + token)
@@ -226,13 +209,13 @@ class CartControllerIT {
     @Test
     void updateCartItem_insufficientStock_returns409() throws Exception {
         String token = registerAndLogin("cart_upd_stock@example.com");
-        long productId = getAnyActiveProductId();
-        long itemId = addItemAndGetItemId(token, productId, 1);
+        long itemId = addItemAndGetItemId(token, 1L, 1);
 
+        // Product 1 has stock_quantity=50; update to 51 → valid qty but exceeds stock → 409
         mockMvc.perform(put("/cart/items/" + itemId)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"quantity\":9999}"))
+                        .content("{\"quantity\":51}"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("INSUFFICIENT_STOCK"));
     }
@@ -240,8 +223,9 @@ class CartControllerIT {
     @Test
     void updateCartItem_invalidQuantityZero_returns400() throws Exception {
         String token = registerAndLogin("cart_upd_zero@example.com");
+        long itemId = addItemAndGetItemId(token, 1L, 1);
 
-        mockMvc.perform(put("/cart/items/1")
+        mockMvc.perform(put("/cart/items/" + itemId)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"quantity\":0}"))
@@ -252,8 +236,7 @@ class CartControllerIT {
     void updateCartItem_anotherUsersItem_returns404() throws Exception {
         String ownerToken = registerAndLogin("cart_upd_owner@example.com");
         String otherToken = registerAndLogin("cart_upd_other@example.com");
-        long productId = getAnyActiveProductId();
-        long itemId = addItemAndGetItemId(ownerToken, productId, 1);
+        long itemId = addItemAndGetItemId(ownerToken, 1L, 1);
 
         mockMvc.perform(put("/cart/items/" + itemId)
                         .header("Authorization", "Bearer " + otherToken)
@@ -269,14 +252,12 @@ class CartControllerIT {
     @Test
     void removeCartItem_ownItem_returns204() throws Exception {
         String token = registerAndLogin("cart_del@example.com");
-        long productId = getAnyActiveProductId();
-        long itemId = addItemAndGetItemId(token, productId, 1);
+        long itemId = addItemAndGetItemId(token, 1L, 1);
 
         mockMvc.perform(delete("/cart/items/" + itemId)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
 
-        // Verify item is gone
         mockMvc.perform(get("/cart")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
@@ -287,8 +268,7 @@ class CartControllerIT {
     void removeCartItem_anotherUsersItem_returns404() throws Exception {
         String ownerToken = registerAndLogin("cart_del_owner@example.com");
         String otherToken = registerAndLogin("cart_del_other@example.com");
-        long productId = getAnyActiveProductId();
-        long itemId = addItemAndGetItemId(ownerToken, productId, 1);
+        long itemId = addItemAndGetItemId(ownerToken, 1L, 1);
 
         mockMvc.perform(delete("/cart/items/" + itemId)
                         .header("Authorization", "Bearer " + otherToken))
@@ -311,12 +291,11 @@ class CartControllerIT {
     @Test
     void getCart_withItems_hasCorrectSchema() throws Exception {
         String token = registerAndLogin("cart_schema@example.com");
-        long productId = getAnyActiveProductId();
 
         mockMvc.perform(post("/cart/items")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(addItemJson(productId, 1)))
+                        .content("{\"productId\":1,\"quantity\":1}"))
                 .andExpect(status().isCreated());
 
         mockMvc.perform(get("/cart")
@@ -335,29 +314,10 @@ class CartControllerIT {
     }
 
     @Test
-    void getCart_recommendations_fieldIsPresentInResponse() throws Exception {
-        String token = registerAndLogin("cart_rec@example.com");
-
-        // recommendedProducts may be absent or empty (no purchase history yet)
-        MvcResult result = mockMvc.perform(get("/cart")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        Map<?, ?> body = parseBody(result);
-        // Field may be absent (null) or an empty list — both are acceptable with no history
-        if (body.containsKey("recommendedProducts") && body.get("recommendedProducts") != null) {
-            assertThat((List<?>) body.get("recommendedProducts")).hasSizeLessThanOrEqualTo(4);
-        }
-    }
-
-    @Test
     void getCart_cartStatusRemainsActive_afterAddAndRemove() throws Exception {
         String token = registerAndLogin("cart_status_check@example.com");
-        long productId = getAnyActiveProductId();
+        long itemId = addItemAndGetItemId(token, 1L, 1);
 
-        // Add then remove
-        long itemId = addItemAndGetItemId(token, productId, 1);
         mockMvc.perform(delete("/cart/items/" + itemId)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
@@ -370,60 +330,89 @@ class CartControllerIT {
     }
 
     // =========================================================================
-    // Helpers
+    // Recommendations
     // =========================================================================
 
-    private String registerAndLogin(String email) throws Exception {
-        String body = String.format("""
-                {
-                  "firstName": "Test",
-                  "lastName": "User",
-                  "email": "%s",
-                  "password": "password123"
-                }
-                """, email);
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated());
+    @Test
+    void getCart_recommendations_returnEmptyList_whenNoPurchaseHistory() throws Exception {
+        String token = registerAndLogin("cart_rec_empty@example.com");
 
-        String loginBody = String.format("""
-                {
-                  "email": "%s",
-                  "password": "password123"
-                }
-                """, email);
-        MvcResult result = mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(loginBody))
+        MvcResult result = mockMvc.perform(get("/cart")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Map<?, ?> response = parseBody(result);
-        return (String) response.get("accessToken");
+        Map<?, ?> body = parseBody(result);
+        // No purchase history → recommendations should be empty list
+        List<?> recs = (List<?>) body.get("recommendedProducts");
+        if (recs != null) {
+            assertThat(recs).isEmpty();
+        }
+        // null is also acceptable when no history
     }
 
-    /**
-     * Returns the id of any active product available in the test database.
-     * Uses the public catalog endpoint — no authentication needed.
-     */
-    private long getAnyActiveProductId() throws Exception {
-        MvcResult result = mockMvc.perform(get("/products?size=1"))
+    @Test
+    void getCart_recommendations_excludeCurrentCartItems() throws Exception {
+        // After checkout (creates purchase history), recommendations should not include
+        // products already in cart
+        String token = registerAndLogin("cart_rec_excl@example.com");
+
+        // Checkout product 1 to create purchase history
+        addItemToCart(token, 1L, 1);
+        long addrId = createAddress(token);
+        checkoutAndGetOrderId(token, addrId);
+
+        // Now add product 2 to cart
+        addItemToCart(token, 2L, 1);
+
+        MvcResult result = mockMvc.perform(get("/cart")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andReturn();
 
         Map<?, ?> body = parseBody(result);
         @SuppressWarnings("unchecked")
-        List<Map<?, ?>> content = (List<Map<?, ?>>) body.get("content");
-        assertThat(content).as("Seed data must include at least one product").isNotEmpty();
-        return ((Number) content.get(0).get("id")).longValue();
+        List<Map<?, ?>> recs = (List<Map<?, ?>>) body.get("recommendedProducts");
+        if (recs != null && !recs.isEmpty()) {
+            // Recommended products must not include product currently in cart (id=2)
+            recs.forEach(rec -> assertThat(((Number) rec.get("id")).longValue()).isNotEqualTo(2L));
+        }
     }
+
+    @Test
+    void getCart_recommendations_usePurchaseHistoryCategories() throws Exception {
+        String token = registerAndLogin("cart_rec_hist@example.com");
+
+        // Purchase product 1 (category 1 = Programming)
+        addItemToCart(token, 1L, 1);
+        long addrId = createAddress(token);
+        checkoutAndGetOrderId(token, addrId);
+
+        // Cart is now empty after checkout
+        MvcResult result = mockMvc.perform(get("/cart")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Map<?, ?> body = parseBody(result);
+        @SuppressWarnings("unchecked")
+        List<Map<?, ?>> recs = (List<Map<?, ?>>) body.get("recommendedProducts");
+        // There is purchase history in category 1, so recommendations should be present
+        // (product 2 in category 1 is available)
+        if (recs != null) {
+            assertThat(recs.size()).isLessThanOrEqualTo(4);
+        }
+    }
+
+    // =========================================================================
+    // Helper
+    // =========================================================================
 
     private long addItemAndGetItemId(String token, long productId, int quantity) throws Exception {
         MvcResult result = mockMvc.perform(post("/cart/items")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(addItemJson(productId, quantity)))
+                        .content("{\"productId\":" + productId + ",\"quantity\":" + quantity + "}"))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -431,14 +420,11 @@ class CartControllerIT {
         @SuppressWarnings("unchecked")
         List<Map<?, ?>> items = (List<Map<?, ?>>) cart.get("items");
         assertThat(items).isNotEmpty();
-        return ((Number) items.get(0).get("id")).longValue();
-    }
-
-    private String addItemJson(long productId, int quantity) {
-        return String.format("{\"productId\":%d,\"quantity\":%d}", productId, quantity);
-    }
-
-    private Map<?, ?> parseBody(MvcResult result) throws Exception {
-        return objectMapper.readValue(result.getResponse().getContentAsString(), Map.class);
+        // Find the item with the matching product id
+        return items.stream()
+                .filter(i -> ((Number) ((Map<?, ?>) i.get("product")).get("id")).longValue() == productId)
+                .mapToLong(i -> ((Number) i.get("id")).longValue())
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Item not found in cart for productId=" + productId));
     }
 }

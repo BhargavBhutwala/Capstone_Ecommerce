@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -81,15 +82,24 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/unauthorized-access")
         String unauthorizedAccess() { throw new UnauthorizedResourceAccessException("Access to this resource is not allowed"); }
 
+        @GetMapping("/bad-credentials")
+        String badCredentials() { throw new BadCredentialsException("Bad credentials"); }
+
         @GetMapping("/unexpected")
         String unexpected() { throw new IllegalStateException("Something went very wrong internally"); }
 
         @PostMapping("/validate")
         String validate(@Valid @RequestBody ValidatedRequest body) { return "ok"; }
 
+        @PostMapping("/enum-body")
+        String enumBody(@RequestBody EnumRequest body) { return body.color().name(); }
+
         record ValidatedRequest(
                 @NotBlank(message = "title must not be blank") String title
         ) {}
+
+        record EnumRequest(Color color) {}
+        enum Color { RED, GREEN, BLUE }
     }
 
     // =========================================================================
@@ -223,6 +233,43 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.fieldErrors", notNullValue()))
                 .andExpect(jsonPath("$.fieldErrors", hasKey("title")))
                 .andExpect(jsonPath("$.fieldErrors.title").value("title must not be blank"));
+    }
+
+    // =========================================================================
+    // 401 — BadCredentialsException (invalid login)
+    // =========================================================================
+
+    @Test
+    void badCredentials_returns401WithInvalidCredentialsCode() throws Exception {
+        mockMvc.perform(get("/test-errors/bad-credentials"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
+                .andExpect(jsonPath("$.message").value("Invalid email or password."))
+                .andExpect(jsonPath("$.path").value("/test-errors/bad-credentials"))
+                .andExpect(jsonPath("$.timestamp", notNullValue()))
+                .andExpect(jsonPath("$.fieldErrors").doesNotExist())
+                // Must not expose internal exception detail
+                .andExpect(jsonPath("$.message", not(containsString("Bad credentials"))))
+                .andExpect(jsonPath("$.message", not(containsString("Exception"))));
+    }
+
+    // =========================================================================
+    // 400 — HttpMessageNotReadableException (invalid enum value, malformed JSON)
+    // =========================================================================
+
+    @Test
+    void malformedRequestBody_invalidEnumValue_returns400() throws Exception {
+        mockMvc.perform(post("/test-errors/enum-body")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"color\":\"PURPLE\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Request body is malformed or contains an invalid value."))
+                .andExpect(jsonPath("$.path").value("/test-errors/enum-body"))
+                .andExpect(jsonPath("$.timestamp", notNullValue()))
+                .andExpect(jsonPath("$.fieldErrors").doesNotExist());
     }
 
     // =========================================================================

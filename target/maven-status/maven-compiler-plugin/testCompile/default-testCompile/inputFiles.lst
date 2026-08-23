@@ -13,5 +13,9 @@ C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\o
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\payment\PaymentControllerIT.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\payment\service\PaymentServiceTest.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\security\JwtTokenProviderTest.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\security\SecurityIT.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\security\UserDetailsServiceImplTest.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\SpringdocIT.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\user\service\UserServiceTest.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\util\AbstractIntegrationTest.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\util\ClockTestConfig.java
