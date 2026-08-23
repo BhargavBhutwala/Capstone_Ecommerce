@@ -10,6 +10,7 @@
  */
 
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import type { Location } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
 
 export function PublicOnlyRoute() {
