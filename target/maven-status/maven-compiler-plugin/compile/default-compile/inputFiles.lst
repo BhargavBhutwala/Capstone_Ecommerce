@@ -11,11 +11,17 @@ C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\a
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\auth\dto\RegisterRequest.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\auth\package-info.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\auth\service\AuthService.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\controller\CartController.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\dto\AddCartItemRequest.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\dto\CartItemResponse.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\dto\CartResponse.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\dto\UpdateCartItemRequest.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\entity\Cart.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\entity\CartItem.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\package-info.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\repository\CartItemRepository.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\repository\CartRepository.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\cart\service\CartService.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\CatalogMapper.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\controller\BrandController.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\main\java\com\ebookstore\catalog\controller\CategoryController.java

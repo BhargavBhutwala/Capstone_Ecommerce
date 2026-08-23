@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.627" tests="15" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.ebookstore.cart.service.CartServiceTest" time="0.621" tests="21" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -58,19 +58,46 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="hasPriceAtLeast_buildsPredicate" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.524"/>
-  <testcase name="hasTitleContaining_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.005"/>
-  <testcase name="buildSearch_composition_isNonNull" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.012"/>
-  <testcase name="hasPriceAtMost_buildsPredicate" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.005"/>
-  <testcase name="hasTitleContaining_buildsPredicate" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.009"/>
-  <testcase name="buildSearch_withNullParams_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.006"/>
-  <testcase name="isAvailable_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.006"/>
-  <testcase name="hasBrand_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.005"/>
-  <testcase name="hasPriceAtLeast_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.005"/>
-  <testcase name="isAvailable_buildsPredicate" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.008"/>
-  <testcase name="isActive_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.006"/>
-  <testcase name="buildSearch_withQ_returnsNonNullPredicateViaTitle" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.006"/>
-  <testcase name="hasCategory_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.005"/>
-  <testcase name="buildSearch_withAllNulls_involvesNoPredicates" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.005"/>
-  <testcase name="hasPriceAtMost_returnsNonNullSpec" classname="com.ebookstore.catalog.repository.ProductSpecificationTest" time="0.004"/>
+  <testcase name="getCart_cartRemainsActive_notModified" classname="com.ebookstore.cart.service.CartServiceTest" time="0.432"/>
+  <testcase name="getCart_calculatesSubtotalAndTotalAmountFromCartItems" classname="com.ebookstore.cart.service.CartServiceTest" time="0.023"/>
+  <testcase name="getCart_returnsCartResponse_forExistingCart" classname="com.ebookstore.cart.service.CartServiceTest" time="0.006"/>
+  <testcase name="addCartItem_existingProduct_mergesQuantity" classname="com.ebookstore.cart.service.CartServiceTest" time="0.012">
+    <system-out><![CDATA[12:13:21.680 [main] INFO com.ebookstore.cart.service.CartService -- Merged cart item: cartId=100, productId=200, newQty=5
+]]></system-out>
+  </testcase>
+  <testcase name="updateCartItem_updatesQuantity" classname="com.ebookstore.cart.service.CartServiceTest" time="0.009">
+    <system-out><![CDATA[12:13:21.692 [main] INFO com.ebookstore.cart.service.CartService -- Updated cart item: itemId=300, newQty=5
+]]></system-out>
+  </testcase>
+  <testcase name="addCartItem_insufficientStock_throwsInsufficientStockException" classname="com.ebookstore.cart.service.CartServiceTest" time="0.016"/>
+  <testcase name="getCart_recommendations_cappedAtFour" classname="com.ebookstore.cart.service.CartServiceTest" time="0.009"/>
+  <testcase name="getCart_recommendations_excludesProductsAlreadyInCart" classname="com.ebookstore.cart.service.CartServiceTest" time="0.008"/>
+  <testcase name="updateCartItem_notFound_throwsResourceNotFoundException" classname="com.ebookstore.cart.service.CartServiceTest" time="0.005"/>
+  <testcase name="getCart_recommendations_returnsEmptyList_whenNoPurchaseHistory" classname="com.ebookstore.cart.service.CartServiceTest" time="0.003"/>
+  <testcase name="addCartItem_cartStatusRemainsActive" classname="com.ebookstore.cart.service.CartServiceTest" time="0.006">
+    <system-out><![CDATA[12:13:21.744 [main] INFO com.ebookstore.cart.service.CartService -- Added cart item: cartId=100, productId=200, qty=1
+]]></system-out>
+  </testcase>
+  <testcase name="addCartItem_inactiveProduct_throwsInsufficientStockException" classname="com.ebookstore.cart.service.CartServiceTest" time="0.005"/>
+  <testcase name="removeCartItem_deletesItem_whenOwned" classname="com.ebookstore.cart.service.CartServiceTest" time="0.004">
+    <system-out><![CDATA[12:13:21.755 [main] INFO com.ebookstore.cart.service.CartService -- Removed cart item: itemId=300, userId=10
+]]></system-out>
+  </testcase>
+  <testcase name="addCartItem_unitPriceIsSetFromProductPrice" classname="com.ebookstore.cart.service.CartServiceTest" time="0.007">
+    <system-out><![CDATA[12:13:21.763 [main] INFO com.ebookstore.cart.service.CartService -- Added cart item: cartId=100, productId=200, qty=1
+]]></system-out>
+  </testcase>
+  <testcase name="addCartItem_newProduct_createsCartItem" classname="com.ebookstore.cart.service.CartServiceTest" time="0.009">
+    <system-out><![CDATA[12:13:21.773 [main] INFO com.ebookstore.cart.service.CartService -- Added cart item: cartId=100, productId=200, qty=2
+]]></system-out>
+  </testcase>
+  <testcase name="removeCartItem_notFound_throwsResourceNotFoundException" classname="com.ebookstore.cart.service.CartServiceTest" time="0.007"/>
+  <testcase name="addCartItem_productNotFound_throwsResourceNotFoundException" classname="com.ebookstore.cart.service.CartServiceTest" time="0.006"/>
+  <testcase name="addCartItem_mergeExceedsStock_throwsInsufficientStockException" classname="com.ebookstore.cart.service.CartServiceTest" time="0.015"/>
+  <testcase name="addCartItem_existingProduct_doesNotCreateDuplicateCartItemRow" classname="com.ebookstore.cart.service.CartServiceTest" time="0.007">
+    <system-out><![CDATA[12:13:21.813 [main] INFO com.ebookstore.cart.service.CartService -- Merged cart item: cartId=100, productId=200, newQty=3
+]]></system-out>
+  </testcase>
+  <testcase name="getCart_recommendations_maximumSizeLimit_passedToRepository" classname="com.ebookstore.cart.service.CartServiceTest" time="0.003"/>
+  <testcase name="updateCartItem_exceedsStock_throwsInsufficientStockException" classname="com.ebookstore.cart.service.CartServiceTest" time="0.005"/>
 </testsuite>

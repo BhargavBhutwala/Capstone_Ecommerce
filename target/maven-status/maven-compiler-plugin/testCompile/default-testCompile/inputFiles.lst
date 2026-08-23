@@ -2,6 +2,8 @@ C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\a
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\address\service\AddressServiceTest.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\auth\AuthControllerIT.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\auth\service\AuthServiceTest.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\cart\CartControllerIT.java
+C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\cart\service\CartServiceTest.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\catalog\CatalogControllerIT.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\catalog\repository\ProductSpecificationTest.java
 C:\Users\BhargavBhutwala\Desktop\Capstone Project\src\test\java\com\ebookstore\catalog\service\ProductServiceTest.java

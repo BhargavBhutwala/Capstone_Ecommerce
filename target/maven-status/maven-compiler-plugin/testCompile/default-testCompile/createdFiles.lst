@@ -5,7 +5,9 @@ com\ebookstore\auth\service\AuthServiceTest$2.class
 com\ebookstore\address\service\AddressServiceTest.class
 com\ebookstore\auth\service\AuthServiceTest.class
 com\ebookstore\security\JwtTokenProviderTest.class
+com\ebookstore\cart\service\CartServiceTest.class
 com\ebookstore\security\UserDetailsServiceImplTest.class
+com\ebookstore\cart\CartControllerIT.class
 com\ebookstore\auth\service\AuthServiceTest$1.class
 com\ebookstore\common\exception\GlobalExceptionHandlerTest$TestExceptionController$ValidatedRequest.class
 com\ebookstore\common\exception\GlobalExceptionHandlerTest.class
