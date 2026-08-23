@@ -163,6 +163,95 @@ export interface CartItemResponse {
   subtotal: number
 }
 
+// ─── Addresses ────────────────────────────────────────────────────────────────
+
+/**
+ * POST /addresses / PUT /addresses/{addressId} request body.
+ * operationId: createAddress / updateAddress
+ * Field constraints mirror AddressRequest in the OpenAPI contract.
+ */
+export interface AddressRequest {
+  /** Optional label e.g. "Home", "Work". maxLength: 50 */
+  label?: string
+  /** Required. minLength:1, maxLength:255 */
+  addressLine1: string
+  /** Optional. maxLength:255 */
+  addressLine2?: string
+  /** Required. minLength:1, maxLength:100 */
+  city: string
+  /** Required. minLength:1, maxLength:100 */
+  state: string
+  /** Required. minLength:3, maxLength:20 */
+  postalCode: string
+  /** Required. minLength:2, maxLength:100 */
+  country: string
+  /** Default: false */
+  isDefault?: boolean
+}
+
+/** GET /addresses[] / POST /addresses response — operationId: listAddresses / createAddress */
+export interface AddressResponse extends AddressRequest {
+  id: number
+}
+
+// ─── Orders ───────────────────────────────────────────────────────────────────
+
+export type OrderStatus =
+  | 'PENDING_PAYMENT'
+  | 'PAID'
+  | 'CONFIRMED'
+  | 'CANCELLED'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'RETURN_REQUESTED'
+  | 'RETURNED'
+  | 'REFUNDED'
+
+/** POST /orders request body — operationId: createOrder */
+export interface CreateOrderRequest {
+  /** ID of the saved address to use as shipping address */
+  addressId: number
+}
+
+/** Single line item inside an OrderResponse */
+export interface OrderItemResponse {
+  id: number
+  productId: number
+  productTitle: string
+  quantity: number
+  /** Purchase-price snapshot — BigDecimal-sourced */
+  unitPrice: number
+  subtotal: number
+}
+
+/** Shipping address snapshot embedded in an order (immutable after creation) */
+export interface ShippingAddressSnapshot {
+  name: string
+  addressLine1: string
+  addressLine2?: string
+  city: string
+  state: string
+  postalCode: string
+  country: string
+}
+
+/**
+ * Full order payload — operationId: getOrder / createOrder
+ */
+export interface OrderResponse {
+  id: number
+  orderNumber: string
+  status: OrderStatus
+  items: OrderItemResponse[]
+  shippingAddress?: ShippingAddressSnapshot
+  subtotal: number
+  shippingAmount?: number
+  discountAmount?: number
+  totalAmount: number
+  placedAt?: string
+  cancellationDeadline?: string | null
+}
+
 /**
  * Full cart payload returned by getCart, addCartItem, updateCartItem.
  * operationId: getCart
