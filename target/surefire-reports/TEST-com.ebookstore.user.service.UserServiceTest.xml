@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.ebookstore.security.JwtTokenProviderTest" time="0.72" tests="11" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.ebookstore.user.service.UserServiceTest" time="0.018" tests="2" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -59,15 +59,6 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="isTokenValid_returnsFalseForWrongSubject" classname="com.ebookstore.security.JwtTokenProviderTest" time="0.548"/>
-  <testcase name="generateToken_doesNotContainUserId" classname="com.ebookstore.security.JwtTokenProviderTest" time="0.008"/>
-  <testcase name="isTokenValid_returnsFalseForExpiredToken" classname="com.ebookstore.security.JwtTokenProviderTest" time="0.082"/>
-  <testcase name="isTokenValid_returnsFalseForGarbageToken" classname="com.ebookstore.security.JwtTokenProviderTest" time="0.008"/>
-  <testcase name="generateToken_returnsNonBlankToken" classname="com.ebookstore.security.JwtTokenProviderTest" time="0.005"/>
-  <testcase name="isTokenValid_returnsFalseForTamperedToken" classname="com.ebookstore.security.JwtTokenProviderTest" time="0.007"/>
-  <testcase name="generateToken_containsEmailAsSubject" classname="com.ebookstore.security.JwtTokenProviderTest" time="0.004"/>
-  <testcase name="generateToken_containsExp" classname="com.ebookstore.security.JwtTokenProviderTest" time="0.021"/>
-  <testcase name="generateToken_containsIat" classname="com.ebookstore.security.JwtTokenProviderTest" time="0.004"/>
-  <testcase name="isTokenValid_returnsFalseForWrongSecretToken" classname="com.ebookstore.security.JwtTokenProviderTest" time="0.008"/>
-  <testcase name="isTokenValid_returnsTrueForValidToken" classname="com.ebookstore.security.JwtTokenProviderTest" time="0.004"/>
+  <testcase name="getCurrentUser_returnsUserResponse_whenFound" classname="com.ebookstore.user.service.UserServiceTest" time="0.006"/>
+  <testcase name="getCurrentUser_throwsResourceNotFoundException_whenMissing" classname="com.ebookstore.user.service.UserServiceTest" time="0.008"/>
 </testsuite>

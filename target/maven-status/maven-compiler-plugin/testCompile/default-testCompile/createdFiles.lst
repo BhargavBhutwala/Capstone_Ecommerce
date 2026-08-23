@@ -1,5 +1,10 @@
 com\ebookstore\common\exception\GlobalExceptionHandlerTest$TestExceptionController.class
+com\ebookstore\auth\service\AuthServiceTest$1.class
 com\ebookstore\common\exception\GlobalExceptionHandlerTest$TestExceptionController$ValidatedRequest.class
+com\ebookstore\common\exception\GlobalExceptionHandlerTest.class
+com\ebookstore\user\service\UserServiceTest.class
+com\ebookstore\auth\service\AuthServiceTest$2.class
+com\ebookstore\auth\service\AuthServiceTest.class
+com\ebookstore\auth\AuthControllerIT.class
 com\ebookstore\security\JwtTokenProviderTest.class
 com\ebookstore\security\UserDetailsServiceImplTest.class
-com\ebookstore\common\exception\GlobalExceptionHandlerTest.class

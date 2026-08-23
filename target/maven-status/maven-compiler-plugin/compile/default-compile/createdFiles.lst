@@ -4,6 +4,7 @@ com\ebookstore\security\JwtTokenProvider.class
 com\ebookstore\cart\entity\CartItem.class
 com\ebookstore\common\exception\UnauthorizedResourceAccessException.class
 com\ebookstore\auth\package-info.class
+com\ebookstore\user\service\UserService.class
 com\ebookstore\catalog\repository\BrandRepository.class
 com\ebookstore\cart\repository\CartRepository.class
 com\ebookstore\payment\entity\Payment.class
@@ -17,11 +18,14 @@ com\ebookstore\EbookstoreApplication.class
 com\ebookstore\common\exception\DuplicatePaymentException.class
 com\ebookstore\order\repository\OrderItemRepository.class
 com\ebookstore\config\package-info.class
+com\ebookstore\auth\controller\AuthController.class
 com\ebookstore\security\UserDetailsServiceImpl.class
 com\ebookstore\common\entity\BaseEntity.class
 com\ebookstore\common\exception\InvalidRequestException.class
+com\ebookstore\user\UserMapper.class
 com\ebookstore\catalog\entity\Brand.class
 com\ebookstore\common\exception\ResourceNotFoundException.class
+com\ebookstore\user\controller\UserController.class
 com\ebookstore\common\exception\BusinessRuleViolationException.class
 com\ebookstore\security\AuthEntryPoint.class
 com\ebookstore\common\exception\InsufficientStockException.class
@@ -30,6 +34,7 @@ com\ebookstore\catalog\repository\CategoryRepository.class
 com\ebookstore\common\dto\ErrorResponse.class
 com\ebookstore\common\domain\UserRole.class
 com\ebookstore\common\domain\PaymentMethod.class
+com\ebookstore\user\dto\UserResponse.class
 com\ebookstore\address\entity\Address.class
 com\ebookstore\cart\entity\Cart.class
 com\ebookstore\user\repository\UserRepository.class
@@ -39,6 +44,7 @@ com\ebookstore\catalog\package-info.class
 com\ebookstore\common\domain\UserStatus.class
 com\ebookstore\security\JwtAuthenticationFilter.class
 com\ebookstore\user\entity\User.class
+com\ebookstore\auth\dto\RegisterRequest.class
 com\ebookstore\order\repository\OrderRepository.class
 com\ebookstore\catalog\entity\Product.class
 com\ebookstore\order\entity\Order.class
@@ -49,7 +55,10 @@ com\ebookstore\order\package-info.class
 com\ebookstore\address\repository\AddressRepository.class
 com\ebookstore\common\domain\CartStatus.class
 com\ebookstore\common\exception\OrderCancellationNotAllowedException.class
+com\ebookstore\auth\dto\LoginResponse.class
 com\ebookstore\security\package-info.class
 com\ebookstore\common\package-info.class
+com\ebookstore\auth\dto\LoginRequest.class
+com\ebookstore\auth\service\AuthService.class
 com\ebookstore\common\entity\BaseCreatedEntity.class
 com\ebookstore\cart\repository\CartItemRepository.class
