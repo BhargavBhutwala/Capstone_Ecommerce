@@ -1,0 +1,22 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.footer {
+  background: #f7f8fa;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: #57606a;
+}
