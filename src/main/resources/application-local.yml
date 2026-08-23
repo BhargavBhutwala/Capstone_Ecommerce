@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/ebookstore}
+    username: ${DB_USERNAME:ebookstore}
+    password: ${DB_PASSWORD:password}
+  flyway:
+    enabled: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:local-dev-secret-must-be-changed-in-production-min-256-bits}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}

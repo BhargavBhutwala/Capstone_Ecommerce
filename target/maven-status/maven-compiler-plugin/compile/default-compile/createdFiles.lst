@@ -1,0 +1,11 @@
+com\ebookstore\cart\package-info.class
+com\ebookstore\address\package-info.class
+com\ebookstore\order\package-info.class
+com\ebookstore\user\package-info.class
+com\ebookstore\payment\package-info.class
+com\ebookstore\security\package-info.class
+com\ebookstore\EbookstoreApplication.class
+com\ebookstore\auth\package-info.class
+com\ebookstore\common\package-info.class
+com\ebookstore\config\package-info.class
+com\ebookstore\catalog\package-info.class
