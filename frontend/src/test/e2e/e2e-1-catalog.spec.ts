@@ -22,10 +22,16 @@ test.describe('E2E-1: Public Catalog', () => {
 
   test('product list page loads products', async ({ page }) => {
     await page.goto('/products')
-    // Wait for products to load — either ProductGrid or EmptyState
-    await expect(
-      page.locator('[class*="productCard"], [class*="emptyState"], [class*="errorState"]').first(),
-    ).toBeVisible({ timeout: 15_000 })
+    // Wait for products to load — the page renders <article> elements for each
+    // product card, or a <p> with the empty/error message.
+    // Both outcomes confirm the page has finished loading.
+    await page.waitForFunction(
+      () =>
+        document.querySelectorAll('article').length > 0 ||
+        document.body.innerText.includes('No products') ||
+        document.body.innerText.includes('Try again'),
+      { timeout: 15_000 },
+    )
   })
 
   test('search filters product list', async ({ page }) => {

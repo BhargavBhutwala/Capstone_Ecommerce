@@ -16,16 +16,15 @@ test.describe('E2E-2: Authentication', () => {
 
   test('registers a new user and accesses protected route', async ({ page }) => {
     await page.goto('/register')
-    await expect(page.locator('h1, h2').first()).toBeVisible({ timeout: 10_000 })
+    await page.waitForSelector('#firstName', { timeout: 10_000 })
 
-    await page.fill('input[name="firstName"], input[id*="firstName"], input[placeholder*="First"]', TEST_USER.firstName)
-    await page.fill('input[name="lastName"], input[id*="lastName"], input[placeholder*="Last"]', TEST_USER.lastName)
-    await page.fill('input[type="email"]', email)
-    await page.fill('input[type="password"]', TEST_USER.password)
+    await page.fill('#firstName', TEST_USER.firstName)
+    await page.fill('#lastName', TEST_USER.lastName)
+    await page.fill('#email', email)
+    await page.fill('#password', TEST_USER.password)
     await page.click('button[type="submit"]')
 
-    // After registration navigate to login or auto-login
-    // We accept any redirect away from /register
+    // After registration the app redirects to /login — accept any redirect away from /register
     await expect(page).not.toHaveURL('/register', { timeout: 10_000 })
   })
 

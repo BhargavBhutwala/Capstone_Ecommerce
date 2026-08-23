@@ -9,40 +9,49 @@
 
 import { test, expect, type Page } from '@playwright/test'
 
-const EMAIL = `e2e-orders-${Date.now()}@example.com`
 const PASSWORD = 'E2EOrders!2024'
 
-async function registerAndLogin(page: Page) {
+async function registerAndLogin(page: Page, email: string) {
   await page.goto('/register')
-  await page.waitForSelector('input[type="email"]', { timeout: 10_000 })
-  await page.fill('input[name="firstName"], input[id*="firstName"], input[placeholder*="First"]', 'Orders')
-  await page.fill('input[name="lastName"], input[id*="lastName"], input[placeholder*="Last"]', 'Tester')
-  await page.fill('input[type="email"]', EMAIL)
-  await page.fill('input[type="password"]', PASSWORD)
+  await page.waitForSelector('#firstName', { timeout: 10_000 })
+  await page.fill('#firstName', 'Orders')
+  await page.fill('#lastName', 'Tester')
+  await page.fill('#email', email)
+  await page.fill('#password', PASSWORD)
   await page.click('button[type="submit"]')
-  await page.waitForTimeout(1000)
-  if (page.url().includes('/login') || page.url().includes('/register')) {
-    await page.goto('/login')
-    await page.fill('input[type="email"]', EMAIL)
-    await page.fill('input[type="password"]', PASSWORD)
+
+  await page.waitForURL((url) => !url.pathname.startsWith('/register'), { timeout: 15_000 })
+
+  if (page.url().includes('/login')) {
+    await page.waitForSelector('#email', { timeout: 5_000 })
+    await page.fill('#email', email)
+    await page.fill('#password', PASSWORD)
     await page.click('button[type="submit"]')
+    await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 15_000 })
   }
-  await expect(page).not.toHaveURL(/\/login|\/register/, { timeout: 10_000 })
+
+  await expect(page).not.toHaveURL(/\/login|\/register/, { timeout: 5_000 })
 }
 
 test.describe('E2E-5: Order History', () => {
   test('order history page loads and is accessible', async ({ page }) => {
-    await registerAndLogin(page)
+    const email = `e2e-orders-1-${Date.now()}@example.com`
+    await registerAndLogin(page, email)
     await page.goto('/orders')
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 10_000 })
-    // Either orders list or empty state
-    await expect(
-      page.locator('[class*="list"], [class*="emptyState"], [class*="card"]').first()
-    ).toBeVisible({ timeout: 10_000 })
+    // Either the order list heading is shown, or the empty state message — use stable text
+    await page.waitForFunction(
+      () =>
+        document.querySelector('ul') !== null ||
+        document.body.innerText.includes('No orders') ||
+        document.body.innerText.includes('Place your first order'),
+      { timeout: 10_000 },
+    )
   })
 
   test('clicking order row opens order detail', async ({ page }) => {
-    await registerAndLogin(page)
+    const email = `e2e-orders-2-${Date.now()}@example.com`
+    await registerAndLogin(page, email)
     await page.goto('/orders')
 
     const orderLink = page.locator('a[href*="/orders/"]').first()
@@ -59,7 +68,8 @@ test.describe('E2E-5: Order History', () => {
   })
 
   test('Buy Again navigates to /cart', async ({ page }) => {
-    await registerAndLogin(page)
+    const email = `e2e-orders-3-${Date.now()}@example.com`
+    await registerAndLogin(page, email)
     await page.goto('/orders')
 
     const orderLink = page.locator('a[href*="/orders/"]').first()

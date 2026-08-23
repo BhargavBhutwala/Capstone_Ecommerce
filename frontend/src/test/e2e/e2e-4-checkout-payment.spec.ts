@@ -18,20 +18,24 @@ const PASSWORD = 'E2ECheckout!2024'
 
 async function registerAndLogin(page: Page) {
   await page.goto('/register')
-  await page.waitForSelector('input[type="email"]', { timeout: 10_000 })
-  await page.fill('input[name="firstName"], input[id*="firstName"], input[placeholder*="First"]', 'Checkout')
-  await page.fill('input[name="lastName"], input[id*="lastName"], input[placeholder*="Last"]', 'Tester')
-  await page.fill('input[type="email"]', EMAIL)
-  await page.fill('input[type="password"]', PASSWORD)
+  await page.waitForSelector('#firstName', { timeout: 10_000 })
+  await page.fill('#firstName', 'Checkout')
+  await page.fill('#lastName', 'Tester')
+  await page.fill('#email', EMAIL)
+  await page.fill('#password', PASSWORD)
   await page.click('button[type="submit"]')
-  await page.waitForTimeout(1000)
-  if (page.url().includes('/login') || page.url().includes('/register')) {
-    await page.goto('/login')
-    await page.fill('input[type="email"]', EMAIL)
-    await page.fill('input[type="password"]', PASSWORD)
+
+  await page.waitForURL((url) => !url.pathname.startsWith('/register'), { timeout: 15_000 })
+
+  if (page.url().includes('/login')) {
+    await page.waitForSelector('#email', { timeout: 5_000 })
+    await page.fill('#email', EMAIL)
+    await page.fill('#password', PASSWORD)
     await page.click('button[type="submit"]')
+    await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 15_000 })
   }
-  await expect(page).not.toHaveURL(/\/login|\/register/, { timeout: 10_000 })
+
+  await expect(page).not.toHaveURL(/\/login|\/register/, { timeout: 5_000 })
 }
 
 async function addProductToCart(page: Page) {
@@ -44,17 +48,15 @@ async function addProductToCart(page: Page) {
 
 async function createAddress(page: Page) {
   await page.goto('/addresses')
-  // Click "Add address" or similar button
-  const addAddrBtn = page.locator('button', { hasText: /add.*address|new address/i }).first()
-  if (await addAddrBtn.isVisible({ timeout: 3_000 })) {
-    await addAddrBtn.click()
-  }
-  await page.waitForSelector('input[id*="addr-line1"], input[autocomplete="address-line1"]', { timeout: 5_000 })
-  await page.fill('input[id*="addr-line1"], input[autocomplete="address-line1"]', '123 Main Street')
-  await page.fill('input[id*="addr-city"], input[autocomplete="address-level2"]', 'Springfield')
-  await page.fill('input[id*="addr-state"], input[autocomplete="address-level1"]', 'IL')
-  await page.fill('input[id*="addr-postal"], input[autocomplete="postal-code"]', '62701')
-  await page.fill('input[id*="addr-country"], input[autocomplete="country-name"]', 'USA')
+  // Wait for page to load, then click Add address to reveal the form
+  await page.waitForSelector('h1', { timeout: 10_000 })
+  await page.locator('button', { hasText: /\+\s*add address/i }).click()
+  await page.waitForSelector('#addr-line1', { timeout: 10_000 })
+  await page.fill('#addr-line1', '123 Main Street')
+  await page.fill('#addr-city', 'Springfield')
+  await page.fill('#addr-state', 'IL')
+  await page.fill('#addr-postal', '62701')
+  await page.fill('#addr-country', 'USA')
   await page.click('button[type="submit"]')
   await page.waitForTimeout(1000)
 }

@@ -14,20 +14,24 @@ const PASSWORD = 'E2ECancel!2024'
 
 async function registerAndLogin(page: Page) {
   await page.goto('/register')
-  await page.waitForSelector('input[type="email"]', { timeout: 10_000 })
-  await page.fill('input[name="firstName"], input[id*="firstName"], input[placeholder*="First"]', 'Cancel')
-  await page.fill('input[name="lastName"], input[id*="lastName"], input[placeholder*="Last"]', 'Tester')
-  await page.fill('input[type="email"]', EMAIL)
-  await page.fill('input[type="password"]', PASSWORD)
+  await page.waitForSelector('#firstName', { timeout: 10_000 })
+  await page.fill('#firstName', 'Cancel')
+  await page.fill('#lastName', 'Tester')
+  await page.fill('#email', EMAIL)
+  await page.fill('#password', PASSWORD)
   await page.click('button[type="submit"]')
-  await page.waitForTimeout(1000)
-  if (page.url().includes('/login') || page.url().includes('/register')) {
-    await page.goto('/login')
-    await page.fill('input[type="email"]', EMAIL)
-    await page.fill('input[type="password"]', PASSWORD)
+
+  await page.waitForURL((url) => !url.pathname.startsWith('/register'), { timeout: 15_000 })
+
+  if (page.url().includes('/login')) {
+    await page.waitForSelector('#email', { timeout: 5_000 })
+    await page.fill('#email', EMAIL)
+    await page.fill('#password', PASSWORD)
     await page.click('button[type="submit"]')
+    await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 15_000 })
   }
-  await expect(page).not.toHaveURL(/\/login|\/register/, { timeout: 10_000 })
+
+  await expect(page).not.toHaveURL(/\/login|\/register/, { timeout: 5_000 })
 }
 
 async function createAddressAndCheckout(page: Page): Promise<string | null> {
@@ -40,16 +44,14 @@ async function createAddressAndCheckout(page: Page): Promise<string | null> {
 
   // Create address
   await page.goto('/addresses')
-  const addAddrBtn = page.locator('button', { hasText: /add.*address|new address/i }).first()
-  if (await addAddrBtn.isVisible({ timeout: 3_000 })) {
-    await addAddrBtn.click()
-  }
-  await page.waitForSelector('input[id*="addr-line1"], input[autocomplete="address-line1"]', { timeout: 5_000 })
-  await page.fill('input[id*="addr-line1"], input[autocomplete="address-line1"]', '100 Cancel St')
-  await page.fill('input[id*="addr-city"], input[autocomplete="address-level2"]', 'Chicago')
-  await page.fill('input[id*="addr-state"], input[autocomplete="address-level1"]', 'IL')
-  await page.fill('input[id*="addr-postal"], input[autocomplete="postal-code"]', '60601')
-  await page.fill('input[id*="addr-country"], input[autocomplete="country-name"]', 'USA')
+  await page.waitForSelector('h1', { timeout: 10_000 })
+  await page.locator('button', { hasText: /\+\s*add address/i }).click()
+  await page.waitForSelector('#addr-line1', { timeout: 10_000 })
+  await page.fill('#addr-line1', '100 Cancel St')
+  await page.fill('#addr-city', 'Chicago')
+  await page.fill('#addr-state', 'IL')
+  await page.fill('#addr-postal', '60601')
+  await page.fill('#addr-country', 'USA')
   await page.click('button[type="submit"]')
   await page.waitForTimeout(1000)
 
@@ -77,16 +79,16 @@ test.describe('E2E-6: Order Cancellation', () => {
     await page.goto(`/orders/${orderId}`)
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 10_000 })
 
-    // Verify status is PENDING_PAYMENT (heuristic label)
-    await expect(page.locator('text=/pending payment/i')).toBeVisible({ timeout: 5_000 })
+    // Verify status is PENDING_PAYMENT (heuristic label) — use .first() as it appears in badge + metadata
+    await expect(page.locator('text=/pending payment/i').first()).toBeVisible({ timeout: 5_000 })
 
     // Cancel button should be visible
     const cancelBtn = page.locator('button', { hasText: /cancel order/i })
     await cancelBtn.waitFor({ timeout: 5_000 })
     await cancelBtn.click()
 
-    // After cancellation, status should update to CANCELLED
-    await expect(page.locator('text=/cancelled/i')).toBeVisible({ timeout: 10_000 })
+    // After cancellation, status should update to CANCELLED — use .first() (badge + metadata)
+    await expect(page.locator('text=/cancelled/i').first()).toBeVisible({ timeout: 10_000 })
 
     // Cancel button should no longer be visible
     await expect(page.locator('button', { hasText: /cancel order/i })).not.toBeVisible({ timeout: 3_000 })

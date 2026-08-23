@@ -17,23 +17,29 @@ const FIRST = 'Cart'
 const LAST = 'Tester'
 
 async function registerAndLogin(page: Page) {
-  // Register
+  // Register — the register page redirects to /login on success
   await page.goto('/register')
-  await page.waitForSelector('input[type="email"]', { timeout: 10_000 })
-  await page.fill('input[name="firstName"], input[id*="firstName"], input[placeholder*="First"]', FIRST)
-  await page.fill('input[name="lastName"], input[id*="lastName"], input[placeholder*="Last"]', LAST)
-  await page.fill('input[type="email"]', EMAIL)
-  await page.fill('input[type="password"]', PASSWORD)
+  await page.waitForSelector('#firstName', { timeout: 10_000 })
+  await page.fill('#firstName', FIRST)
+  await page.fill('#lastName', LAST)
+  await page.fill('#email', EMAIL)
+  await page.fill('#password', PASSWORD)
   await page.click('button[type="submit"]')
-  // Navigate to login if not auto-logged in
-  await page.waitForTimeout(1000)
-  if (page.url().includes('/login') || page.url().includes('/register')) {
-    await page.goto('/login')
-    await page.fill('input[type="email"]', EMAIL)
-    await page.fill('input[type="password"]', PASSWORD)
+
+  // Wait until we leave /register
+  await page.waitForURL((url) => !url.pathname.startsWith('/register'), { timeout: 15_000 })
+
+  // Registration redirects to /login — complete sign-in
+  if (page.url().includes('/login')) {
+    await page.waitForSelector('#email', { timeout: 5_000 })
+    await page.fill('#email', EMAIL)
+    await page.fill('#password', PASSWORD)
     await page.click('button[type="submit"]')
+    // Wait until we leave /login
+    await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 15_000 })
   }
-  await expect(page).not.toHaveURL(/\/login|\/register/, { timeout: 10_000 })
+
+  await expect(page).not.toHaveURL(/\/login|\/register/, { timeout: 5_000 })
 }
 
 test.describe('E2E-3: Cart', () => {
@@ -51,15 +57,15 @@ test.describe('E2E-3: Cart', () => {
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 10_000 })
 
     // Totals are rendered from backend (numeric value visible)
-    await expect(page.locator('text=/\\$\\d+\\.\\d{2}/')).toBeVisible({ timeout: 5_000 })
+    await expect(page.locator('text=/\\$\\d+\\.\\d{2}/').first()).toBeVisible({ timeout: 5_000 })
 
     // Remove item
     const removeBtn = page.locator('button', { hasText: /remove/i }).first()
     if (await removeBtn.isVisible()) {
       await removeBtn.click()
-      // Cart should now show empty state or update
+      // Cart should now show empty state — match the exact message from EmptyState
       await expect(
-        page.locator('text=/cart is empty|no items/i, [class*="emptyState"]').first()
+        page.locator('p', { hasText: /your cart is empty/i }).first()
       ).toBeVisible({ timeout: 10_000 })
     }
   })

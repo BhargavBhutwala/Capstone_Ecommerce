@@ -24,5 +24,6 @@ export default defineConfig({
     exclude: ['src/test/e2e/**'],
     pool: 'threads',
     testTimeout: 20000,
+    maxWorkers: 2,
   },
 })
