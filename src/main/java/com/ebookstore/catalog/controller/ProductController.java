@@ -4,6 +4,8 @@ import com.ebookstore.catalog.dto.ProductResponse;
 import com.ebookstore.catalog.dto.ProductSummary;
 import com.ebookstore.catalog.service.ProductService;
 import com.ebookstore.common.dto.PagedResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -32,11 +34,13 @@ public class ProductController {
     }
 
     /**
-     * operationId: searchProducts
+     * operationId: searchProducts — public (no JWT required)
      *
      * <p>Default: {@code availableOnly=true}, sorted by {@code title,asc}.
      * All filter params are optional.
      */
+    @Operation(operationId = "searchProducts", summary = "Search and filter products")
+    @SecurityRequirements
     @GetMapping
     public ResponseEntity<PagedResponse<ProductSummary>> searchProducts(
             @RequestParam(required = false) String q,
@@ -50,17 +54,21 @@ public class ProductController {
                 productService.searchProducts(q, categoryId, brandId, minPrice, maxPrice, availableOnly, pageable));
     }
 
-    /** operationId: getProduct */
+    /** operationId: getProduct — public (no JWT required) */
+    @Operation(operationId = "getProduct", summary = "Get a product by id")
+    @SecurityRequirements
     @GetMapping("/{productId}")
     public ResponseEntity<ProductResponse> getProduct(@PathVariable Long productId) {
         return ResponseEntity.ok(productService.getProduct(productId));
     }
 
     /**
-     * operationId: getRelatedProducts
+     * operationId: getRelatedProducts — public (no JWT required)
      *
      * <p>Default size = 5 (sensible default; overridden by {@code ?size=} param).
      */
+    @Operation(operationId = "getRelatedProducts", summary = "Get related products")
+    @SecurityRequirements
     @GetMapping("/{productId}/related")
     public ResponseEntity<List<ProductSummary>> getRelatedProducts(
             @PathVariable Long productId,

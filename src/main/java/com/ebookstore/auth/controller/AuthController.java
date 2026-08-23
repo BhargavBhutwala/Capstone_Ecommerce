@@ -5,6 +5,8 @@ import com.ebookstore.auth.dto.LoginResponse;
 import com.ebookstore.auth.dto.RegisterRequest;
 import com.ebookstore.auth.service.AuthService;
 import com.ebookstore.user.dto.UserResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,14 +28,18 @@ public class AuthController {
         this.authService = authService;
     }
 
-    /** operationId: registerUser */
+    /** operationId: registerUser — public (no JWT required) */
+    @Operation(operationId = "registerUser", summary = "Register a customer account")
+    @SecurityRequirements
     @PostMapping("/register")
     public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody RegisterRequest request) {
         UserResponse response = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /** operationId: login */
+    /** operationId: login — public (no JWT required) */
+    @Operation(operationId = "login", summary = "Authenticate and obtain a JWT")
+    @SecurityRequirements
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
@@ -46,6 +52,7 @@ public class AuthController {
      * <p>Stateless — no server-side token invalidation. The client discards the token.
      * JWT expiry remains the logout mechanism.
      */
+    @Operation(operationId = "logout", summary = "Logout (client-side token discard)")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
         return ResponseEntity.noContent().build();

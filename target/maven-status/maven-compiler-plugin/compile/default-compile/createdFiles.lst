@@ -50,6 +50,7 @@ com\ebookstore\payment\processor\PaymentProcessor.class
 com\ebookstore\common\domain\OrderStatus.class
 com\ebookstore\common\domain\PaymentStatus.class
 com\ebookstore\security\JwtTokenProvider.class
+com\ebookstore\config\OpenApiConfig.class
 com\ebookstore\catalog\dto\DeliveryEstimate.class
 com\ebookstore\auth\package-info.class
 com\ebookstore\payment\controller\PaymentController.class

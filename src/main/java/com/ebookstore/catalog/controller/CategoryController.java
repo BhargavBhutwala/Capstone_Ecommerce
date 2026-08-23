@@ -5,6 +5,8 @@ import com.ebookstore.catalog.dto.ProductSummary;
 import com.ebookstore.catalog.service.CategoryService;
 import com.ebookstore.catalog.service.ProductService;
 import com.ebookstore.common.dto.PagedResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -32,13 +34,17 @@ public class CategoryController {
         this.productService = productService;
     }
 
-    /** operationId: listCategories */
+    /** operationId: listCategories — public (no JWT required) */
+    @Operation(operationId = "listCategories", summary = "List all active categories")
+    @SecurityRequirements
     @GetMapping
     public ResponseEntity<List<CategorySummary>> listCategories() {
         return ResponseEntity.ok(categoryService.listActiveCategories());
     }
 
-    /** operationId: getProductsByCategory */
+    /** operationId: getProductsByCategory — public (no JWT required) */
+    @Operation(operationId = "getProductsByCategory", summary = "Get products by category")
+    @SecurityRequirements
     @GetMapping("/{categoryId}/products")
     public ResponseEntity<PagedResponse<ProductSummary>> getProductsByCategory(
             @PathVariable Long categoryId,

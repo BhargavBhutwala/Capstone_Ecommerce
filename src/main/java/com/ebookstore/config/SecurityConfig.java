@@ -66,6 +66,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
                 // Actuator health check — public
                 .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
+                // Springdoc / Swagger UI — documentation tooling, not a business endpoint
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 // Everything else requires authentication
                 .anyRequest().authenticated()
             )

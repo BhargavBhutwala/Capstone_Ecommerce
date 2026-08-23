@@ -3,6 +3,7 @@ package com.ebookstore.user.controller;
 import com.ebookstore.security.AuthenticatedUser;
 import com.ebookstore.user.dto.UserResponse;
 import com.ebookstore.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +29,7 @@ public class UserController {
      * <p>The user id is obtained exclusively from the authenticated principal —
      * never from request parameters, request body, or JWT claims.
      */
+    @Operation(operationId = "getCurrentUser", summary = "Get the authenticated user's profile")
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
         AuthenticatedUser principal = (AuthenticatedUser) authentication.getPrincipal();

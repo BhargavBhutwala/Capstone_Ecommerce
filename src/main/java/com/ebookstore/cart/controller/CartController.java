@@ -5,6 +5,7 @@ import com.ebookstore.cart.dto.CartResponse;
 import com.ebookstore.cart.dto.UpdateCartItemRequest;
 import com.ebookstore.cart.service.CartService;
 import com.ebookstore.security.AuthenticatedUser;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,7 @@ public class CartController {
     }
 
     /** operationId: getCart */
+    @Operation(operationId = "getCart", summary = "Get the authenticated user's cart")
     @GetMapping
     public ResponseEntity<CartResponse> getCart(Authentication authentication) {
         Long userId = ((AuthenticatedUser) authentication.getPrincipal()).getId();
@@ -44,6 +46,7 @@ public class CartController {
     }
 
     /** operationId: addCartItem */
+    @Operation(operationId = "addCartItem", summary = "Add an item to the cart")
     @PostMapping("/items")
     public ResponseEntity<CartResponse> addCartItem(
             @Valid @RequestBody AddCartItemRequest request,
@@ -54,6 +57,7 @@ public class CartController {
     }
 
     /** operationId: updateCartItem */
+    @Operation(operationId = "updateCartItem", summary = "Update cart item quantity")
     @PutMapping("/items/{itemId}")
     public ResponseEntity<CartResponse> updateCartItem(
             @PathVariable Long itemId,
@@ -65,6 +69,7 @@ public class CartController {
     }
 
     /** operationId: removeCartItem */
+    @Operation(operationId = "removeCartItem", summary = "Remove an item from the cart")
     @DeleteMapping("/items/{itemId}")
     public ResponseEntity<Void> removeCartItem(
             @PathVariable Long itemId,

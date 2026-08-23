@@ -4,6 +4,7 @@ import com.ebookstore.address.dto.AddressRequest;
 import com.ebookstore.address.dto.AddressResponse;
 import com.ebookstore.address.service.AddressService;
 import com.ebookstore.security.AuthenticatedUser;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,7 @@ public class AddressController {
     }
 
     /** operationId: listAddresses */
+    @Operation(operationId = "listAddresses", summary = "List the authenticated user's addresses")
     @GetMapping
     public ResponseEntity<List<AddressResponse>> listAddresses(Authentication authentication) {
         Long userId = ((AuthenticatedUser) authentication.getPrincipal()).getId();
@@ -43,6 +45,7 @@ public class AddressController {
     }
 
     /** operationId: createAddress */
+    @Operation(operationId = "createAddress", summary = "Create a new address")
     @PostMapping
     public ResponseEntity<AddressResponse> createAddress(
             @Valid @RequestBody AddressRequest request,
@@ -53,6 +56,7 @@ public class AddressController {
     }
 
     /** operationId: updateAddress */
+    @Operation(operationId = "updateAddress", summary = "Update an existing address")
     @PutMapping("/{addressId}")
     public ResponseEntity<AddressResponse> updateAddress(
             @PathVariable Long addressId,
@@ -64,6 +68,7 @@ public class AddressController {
     }
 
     /** operationId: deleteAddress */
+    @Operation(operationId = "deleteAddress", summary = "Delete an address")
     @DeleteMapping("/{addressId}")
     public ResponseEntity<Void> deleteAddress(
             @PathVariable Long addressId,

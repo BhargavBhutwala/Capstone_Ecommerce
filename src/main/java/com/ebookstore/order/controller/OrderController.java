@@ -7,6 +7,7 @@ import com.ebookstore.order.dto.CreateOrderRequest;
 import com.ebookstore.order.dto.OrderResponse;
 import com.ebookstore.order.service.OrderService;
 import com.ebookstore.security.AuthenticatedUser;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +41,7 @@ public class OrderController {
     }
 
     /** operationId: listOrders */
+    @Operation(operationId = "listOrders", summary = "List the authenticated user's orders")
     @GetMapping
     public ResponseEntity<PagedResponse<OrderResponse>> listOrders(
             @RequestParam(defaultValue = "0") int page,
@@ -51,6 +53,7 @@ public class OrderController {
     }
 
     /** operationId: createOrder */
+    @Operation(operationId = "createOrder", summary = "Create an order (checkout)")
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(
             @Valid @RequestBody CreateOrderRequest request,
@@ -61,6 +64,7 @@ public class OrderController {
     }
 
     /** operationId: getOrder */
+    @Operation(operationId = "getOrder", summary = "Get an order by id")
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getOrder(
             @PathVariable Long orderId,
@@ -70,6 +74,7 @@ public class OrderController {
     }
 
     /** operationId: buyAgain */
+    @Operation(operationId = "buyAgain", summary = "Re-add historical order items to cart")
     @PostMapping("/{orderId}/buy-again")
     public ResponseEntity<CartResponse> buyAgain(
             @PathVariable Long orderId,
@@ -79,6 +84,7 @@ public class OrderController {
     }
 
     /** operationId: cancelOrder */
+    @Operation(operationId = "cancelOrder", summary = "Cancel an order within the cancellation window")
     @PostMapping("/{orderId}/cancel")
     public ResponseEntity<OrderResponse> cancelOrder(
             @PathVariable Long orderId,

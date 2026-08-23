@@ -4,6 +4,7 @@ import com.ebookstore.payment.dto.CreatePaymentRequest;
 import com.ebookstore.payment.dto.PaymentResponse;
 import com.ebookstore.payment.service.PaymentService;
 import com.ebookstore.security.AuthenticatedUser;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,7 @@ public class PaymentController {
      * <p>Initiates payment for an order. Returns 201 on success, 409 on conflict
      * (duplicate payment or order not in PENDING_PAYMENT state).
      */
+    @Operation(operationId = "initiatePayment", summary = "Initiate payment for an order")
     @PostMapping
     public ResponseEntity<PaymentResponse> initiatePayment(
             @Valid @RequestBody CreatePaymentRequest request,
@@ -56,6 +58,7 @@ public class PaymentController {
      * <p>Returns payment status for the given id. Returns 404 if not found or
      * if the payment does not belong to the authenticated user.
      */
+    @Operation(operationId = "getPayment", summary = "Get payment status")
     @GetMapping("/{paymentId}")
     public ResponseEntity<PaymentResponse> getPayment(
             @PathVariable Long paymentId,
