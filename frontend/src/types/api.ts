@@ -49,6 +49,60 @@ export interface UserResponse {
   createdAt?: string
 }
 
+// ─── Catalog — Categories ──────────────────────────────────────────────────────
+
+/** Item in GET /categories array response — operationId: listCategories */
+export interface CategorySummary {
+  id: number
+  name: string
+  description?: string
+  active?: boolean
+}
+
+// ─── Catalog — Brands ──────────────────────────────────────────────────────────
+
+/** Item in GET /brands array response — operationId: listBrands */
+export interface BrandSummary {
+  id: number
+  name: string
+  description?: string
+  active?: boolean
+}
+
+// ─── Catalog — Products ────────────────────────────────────────────────────────
+
+/** Delivery estimate embedded in ProductResponse */
+export interface DeliveryEstimate {
+  minDays: number
+  maxDays: number
+}
+
+/**
+ * Product summary — used in paginated product lists and related-products arrays.
+ * operationId: searchProducts / getProductsByCategory / getProductsByBrand / getRelatedProducts
+ */
+export interface ProductSummary {
+  id: number
+  title: string
+  /** Monetary value — treat as BigDecimal-sourced, render with 2 decimal places */
+  price: number
+  available: boolean
+  isbn?: string
+  stockQuantity?: number
+}
+
+/**
+ * Full product detail — returned by GET /products/{productId}.
+ * Extends ProductSummary via OpenAPI allOf composition.
+ * operationId: getProduct
+ */
+export interface ProductResponse extends ProductSummary {
+  description?: string
+  category?: CategorySummary
+  brand?: BrandSummary
+  deliveryEstimate?: DeliveryEstimate
+}
+
 // ─── Errors ────────────────────────────────────────────────────────────────────
 
 /**
