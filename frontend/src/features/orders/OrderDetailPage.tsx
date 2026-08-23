@@ -56,7 +56,7 @@ function formatDateTime(iso: string): string {
  */
 const CANCELLABLE_STATUSES: Set<OrderStatus> = new Set([
   'PENDING_PAYMENT',
-  'CONFIRMED',
+  'PAID',
 ])
 
 // ─── Component ────────────────────────────────────────────────────────────────
