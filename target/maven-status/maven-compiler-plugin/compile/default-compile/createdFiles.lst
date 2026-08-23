@@ -24,6 +24,7 @@ com\ebookstore\common\exception\InsufficientStockException.class
 com\ebookstore\catalog\repository\CategoryRepository.class
 com\ebookstore\common\domain\UserRole.class
 com\ebookstore\common\domain\PaymentMethod.class
+com\ebookstore\payment\service\PaymentService.class
 com\ebookstore\user\dto\UserResponse.class
 com\ebookstore\catalog\dto\CategorySummary.class
 com\ebookstore\catalog\dto\BrandSummary.class
@@ -37,6 +38,7 @@ com\ebookstore\cart\service\CartService.class
 com\ebookstore\common\domain\CartStatus.class
 com\ebookstore\auth\dto\LoginResponse.class
 com\ebookstore\catalog\dto\ProductResponse.class
+com\ebookstore\payment\dto\PaymentResponse.class
 com\ebookstore\cart\dto\CartResponse.class
 com\ebookstore\auth\dto\LoginRequest.class
 com\ebookstore\auth\service\AuthService.class
@@ -44,11 +46,13 @@ com\ebookstore\common\entity\BaseCreatedEntity.class
 com\ebookstore\catalog\controller\BrandController.class
 com\ebookstore\catalog\CatalogMapper.class
 com\ebookstore\common\dto\PageMetadata.class
+com\ebookstore\payment\processor\PaymentProcessor.class
 com\ebookstore\common\domain\OrderStatus.class
 com\ebookstore\common\domain\PaymentStatus.class
 com\ebookstore\security\JwtTokenProvider.class
 com\ebookstore\catalog\dto\DeliveryEstimate.class
 com\ebookstore\auth\package-info.class
+com\ebookstore\payment\controller\PaymentController.class
 com\ebookstore\security\AuthenticatedUser.class
 com\ebookstore\catalog\controller\CategoryController.class
 com\ebookstore\security\AccessDeniedHandlerImpl.class
@@ -73,6 +77,7 @@ com\ebookstore\address\entity\Address.class
 com\ebookstore\cart\entity\Cart.class
 com\ebookstore\user\repository\UserRepository.class
 com\ebookstore\catalog\entity\Category.class
+com\ebookstore\payment\processor\SimulatedPaymentProcessor.class
 com\ebookstore\cart\controller\CartController.class
 com\ebookstore\address\dto\AddressRequest.class
 com\ebookstore\order\dto\CreateOrderRequest.class
@@ -88,6 +93,7 @@ com\ebookstore\order\package-info.class
 com\ebookstore\address\repository\AddressRepository.class
 com\ebookstore\catalog\service\ProductService.class
 com\ebookstore\common\exception\OrderCancellationNotAllowedException.class
+com\ebookstore\payment\dto\CreatePaymentRequest.class
 com\ebookstore\security\package-info.class
 com\ebookstore\catalog\dto\ProductSummary.class
 com\ebookstore\common\package-info.class

@@ -2,6 +2,8 @@ com\ebookstore\order\service\OrderServiceTest$5.class
 com\ebookstore\common\exception\GlobalExceptionHandlerTest$TestExceptionController.class
 com\ebookstore\order\service\OrderServiceTest$10.class
 com\ebookstore\order\service\OrderServiceTest.class
+com\ebookstore\payment\PaymentControllerIT.class
+com\ebookstore\payment\service\PaymentServiceTest.class
 com\ebookstore\auth\service\AuthServiceTest$2.class
 com\ebookstore\address\service\AddressServiceTest.class
 com\ebookstore\auth\service\AuthServiceTest.class
