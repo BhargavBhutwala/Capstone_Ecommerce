@@ -33,9 +33,9 @@ export function Header() {
             <>
               <Link to="/orders">My Orders</Link>
               <Link to="/cart">Cart</Link>
-              <span className={styles.userLabel}>
+              <Link to="/profile" className={styles.userLabel}>
                 {user.firstName} {user.lastName}
-              </span>
+              </Link>
               <button
                 onClick={handleLogout}
                 disabled={loading}

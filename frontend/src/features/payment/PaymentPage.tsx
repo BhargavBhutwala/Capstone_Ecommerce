@@ -31,6 +31,8 @@ import { Link, useParams } from 'react-router-dom'
 import * as paymentApi from '../../api/paymentApi'
 import { ApiError } from '../../api/client'
 import type { PaymentMethod, PaymentResponse, PaymentStatus } from '../../types/api'
+import { formatCurrency } from '../../utils/formatCurrency'
+import { formatDateTime } from '../../utils/formatDateTime'
 import styles from './PaymentPage.module.css'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -42,17 +44,6 @@ function statusLabel(status: PaymentStatus): string {
     case 'SUCCESS':     return 'Payment successful'
     case 'FAILED':      return 'Payment failed'
     case 'REFUNDED':    return 'Refunded'
-  }
-}
-
-function formatDateTime(iso: string): string {
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(iso))
-  } catch {
-    return iso
   }
 }
 
@@ -78,7 +69,7 @@ function PaymentResult({ payment, onRefreshStatus, refreshing }: PaymentResultPr
         <dd>{payment.paymentReference}</dd>
 
         <dt>Amount</dt>
-        <dd>${payment.amount.toFixed(2)}</dd>
+        <dd>{formatCurrency(payment.amount)}</dd>
 
         <dt>Payment method</dt>
         <dd>{payment.paymentMethod === 'CREDIT_CARD' ? 'Credit card' : 'Debit card'}</dd>

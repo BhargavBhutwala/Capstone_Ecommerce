@@ -25,6 +25,7 @@ import { CheckoutPage } from '../features/checkout/CheckoutPage'
 import { OrdersPage } from '../features/orders/OrdersPage'
 import { OrderDetailPage } from '../features/orders/OrderDetailPage'
 import { PaymentPage } from '../features/payment/PaymentPage'
+import { ProfilePage } from '../features/profile/ProfilePage'
 
 export const router = createBrowserRouter([
   {
@@ -59,6 +60,7 @@ export const router = createBrowserRouter([
           { path: 'orders', element: <OrdersPage /> },
           { path: 'orders/:orderId', element: <OrderDetailPage /> },
           { path: 'orders/:orderId/payment', element: <PaymentPage /> },
+          { path: 'profile', element: <ProfilePage /> },
         ],
       },
 

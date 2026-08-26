@@ -73,7 +73,8 @@ describe('OrdersPage', () => {
   it('renders order total from backend response', async () => {
     renderOrders()
     await waitFor(() => {
-      expect(screen.getByText('$19.99')).toBeInTheDocument()
+      // Amount rendered via formatCurrency (INR) — ₹19.99
+      expect(screen.getByText('₹19.99')).toBeInTheDocument()
     })
   })
 

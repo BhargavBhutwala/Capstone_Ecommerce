@@ -1,77 +1,24 @@
 # E-Bookstore — IBM AI Specialist Capstone
 
-A full-stack online bookstore built as the IBM AI Specialist Capstone project.
-The backend is a Spring Boot 3 modular monolith backed by PostgreSQL; the frontend is a React 18 + TypeScript single-page application.
-The project was designed and implemented using a design-first workflow: requirements → data model → OpenAPI contract → implementation.
-
-**Status: Full-stack MVP complete and validated.**
-
----
-
-## Table of Contents
-
-1. [MVP Features](#mvp-features)
-2. [Tech Stack](#tech-stack)
-3. [Architecture and Project Structure](#architecture-and-project-structure)
-4. [Prerequisites](#prerequisites)
-5. [Local Database Setup](#local-database-setup)
-6. [Backend Startup](#backend-startup)
-7. [Frontend Startup](#frontend-startup)
-8. [API Documentation](#api-documentation)
-9. [Testing](#testing)
-10. [Test Results](#test-results)
-11. [MVP Scope Boundary](#mvp-scope-boundary)
-12. [Important Implementation Notes](#important-implementation-notes)
-13. [Repository Documentation](#repository-documentation)
+A full-stack e-bookstore platform built as the IBM AI Specialist Capstone project. The backend is a Spring Boot modular monolith exposing a documented REST API; the frontend is a React + TypeScript single-page application. Both layers are fully implemented, tested, and validated.
 
 ---
 
 ## MVP Features
 
-### Authentication
-- User registration with BCrypt-hashed passwords
-- Login returning a stateless JWT Bearer token
-- Logout (client-side token discard)
-
-### Product Catalog
-- Browse products with pagination and server-side sorting
-- Full-text keyword search
-- Filter by category, brand, price range, and availability
-- Category listing
-- Brand listing
-- Product detail page with related-product suggestions (same category/brand)
-
-### Shopping Cart
-- Add products to cart; duplicate products increment quantity rather than create a new row
-- Update item quantity
-- Remove items
-- View cart summary with server-authoritative pricing
-
-### Addresses
-- Add, update, and delete delivery addresses
-- Set a default address
-- Addresses are available for selection at checkout
-
-### Checkout and Orders
-- Full transactional checkout: stock validation → address snapshot → price snapshot → order creation → stock decrement
-- Payment is initiated separately after order creation through the simulated payment endpoint
-- Order total calculated server-side; client-supplied totals are never trusted
-- Shipping address copied as seven flat snapshot columns onto the order (never a live FK)
-- Product title and unit price snapshotted onto each order item at purchase time
-
-### Simulated Payment
-- Simulated payment flow: payment is initiated and completed immediately as `SUCCESS`
-- No real card processing; no raw payment credentials stored
-- Duplicate successful payment prevention per order
-
-### Order History and Buy Again
-- List all orders for the authenticated customer, newest first
-- Order detail including historical snapshot prices and address
-- Buy Again: re-adds historical order items to the active cart after validating current stock, availability, and pricing
-
-### Order Cancellation
-- Cancellation allowed while `current time ≤ cancellation_deadline` (`placed_at + 48 h`)
-- Deadline persisted on the order at creation; enforced server-side in the service layer
+| Domain | Capability |
+|--------|-----------|
+| Authentication | Register, login, logout; stateless JWT Bearer tokens |
+| Catalog | Paginated product listing; search by keyword; filter by category, brand, price range; product detail |
+| Related products | Same-category/brand recommendations on product detail and cart pages |
+| Cart | Add, update quantity, remove items; server-authoritative subtotal and total |
+| Addresses | Create, list, update, delete saved addresses; default address support |
+| Checkout | Select shipping address; server-side stock validation, price snapshot, and order creation |
+| Simulated payment | Initiate payment (CREDIT\_CARD or DEBIT\_CARD); simulated INITIATED → PROCESSING → SUCCESS/FAILED flow |
+| Order history | Paginated order list with status filter; order detail showing immutable item and address snapshots |
+| Buy Again | Re-adds all items from a historical order to the active cart with current stock/price validation |
+| Order cancellation | Cancel button visible when order is in a cancellable status; backend enforces 48-hour deadline |
+| User profile | Authenticated profile page showing account details and saved addresses |
 
 ---
 
@@ -79,169 +26,137 @@ The project was designed and implemented using a design-first workflow: requirem
 
 ### Backend
 
-| Component | Technology |
-|-----------|-----------|
+| Layer | Technology |
+|-------|-----------|
 | Language | Java 21 |
 | Framework | Spring Boot 3.4.1 |
-| Build tool | Maven |
+| Build | Maven |
 | Persistence | Spring Data JPA / Hibernate |
 | Database | PostgreSQL |
-| Schema migrations | Flyway |
-| Security | Spring Security + Stateless JWT Bearer (jjwt 0.12.6) |
-| Validation | Jakarta Bean Validation |
-| API docs | Springdoc OpenAPI 2.7.0 / Swagger UI |
-| Testing | JUnit 5, Mockito, Spring Boot Test, Testcontainers 1.21.4 |
+| Schema management | Flyway |
+| Security | Spring Security, stateless JWT Bearer (jjwt 0.12.6) |
+| API documentation | Springdoc OpenAPI 2.7.0 |
+| Testing | JUnit 5, Mockito, Testcontainers 1.21.4 |
 
 ### Frontend
 
-| Component | Technology |
-|-----------|-----------|
+| Layer | Technology |
+|-------|-----------|
 | Language | TypeScript 5.6 |
-| Framework | React 18.3 |
-| Bundler | Vite 6 |
-| Routing | React Router v7 |
-| HTTP | Native `fetch` API |
-| Unit/component tests | Vitest 4 + React Testing Library 16 |
-| E2E/integration tests | Playwright 1.62 |
-| Linting | ESLint 10 + typescript-eslint |
+| Framework | React 18 |
+| Build tool | Vite 6 |
+| Routing | React Router 7 |
+| HTTP client | Native `fetch` API (no third-party client library) |
+| Unit / component tests | Vitest 4, React Testing Library 16 |
+| Integration tests | Playwright 1.62 |
 
 ---
 
-## Architecture and Project Structure
-
-The backend follows a **domain-oriented modular monolith**. Each domain owns its controller, service, repository, entity, and DTO layers. Controllers handle HTTP concerns only; business rules live exclusively in service classes.
+## Architecture
 
 ```
-Capstone Project/
-├── docs/
-│   ├── 01-requirements-specification.md
-│   ├── 02-data-model-design.md
-│   └── 03-openapi-specification.yaml
-├── src/
-│   ├── main/
-│   │   ├── java/com/ebookstore/
-│   │   │   ├── auth/            # Registration, login, JWT issuance
-│   │   │   ├── user/            # User profile
-│   │   │   ├── catalog/         # Products, categories, brands, search
-│   │   │   ├── cart/            # Cart and cart-item management
-│   │   │   ├── address/         # Delivery addresses
-│   │   │   ├── order/           # Checkout, order lifecycle, Buy Again
-│   │   │   ├── payment/         # Simulated payment processing
-│   │   │   ├── security/        # JWT filter, UserDetailsService
-│   │   │   ├── config/          # Security config, Jackson, OpenAPI beans
-│   │   │   └── common/          # Error response, exception hierarchy, pagination
-│   │   └── resources/
-│   │       ├── application.yml
-│   │       ├── application-local.yml
-│   │       └── db/migration/    # Flyway SQL migrations (V1–V11)
-│   └── test/
-│       └── java/com/ebookstore/ # Unit tests (*Test.java) and IT tests (*IT.java)
-├── frontend/
-│   ├── src/
-│   │   ├── api/                 # fetch-based API client modules
-│   │   ├── app/                 # App shell, providers, layout
-│   │   ├── features/
-│   │   │   ├── auth/
-│   │   │   ├── catalog/
-│   │   │   ├── cart/
-│   │   │   ├── address/
-│   │   │   ├── checkout/
-│   │   │   ├── payment/
-│   │   │   └── orders/
-│   │   ├── components/          # Shared UI primitives and form components
-│   │   ├── hooks/               # Shared custom React hooks
-│   │   ├── routes/              # Route definitions and guards
-│   │   ├── types/               # OpenAPI-aligned TypeScript DTOs
-│   │   └── utils/
-│   ├── vite.config.ts           # Dev proxy: /api → http://localhost:8080
-│   └── package.json
-├── AGENTS.md                    # Project coding rules and AI workflow guidelines
-└── pom.xml
+com.ebookstore
+├── auth          # Registration, login, JWT issuance
+├── user          # User entity and profile
+├── catalog       # Products, categories, brands
+├── cart          # Cart and cart items
+├── address       # Saved shipping addresses
+├── order         # Order creation, history, cancellation, Buy Again
+├── payment       # Simulated payment processing
+├── security      # JWT filter, security configuration
+├── config        # CORS, Jackson, application-level beans
+└── common        # Shared DTOs, exceptions, error handling
 ```
 
-### Database schema (Flyway migrations)
+Each domain follows the standard layering:
 
-| Migration | Table |
-|-----------|-------|
-| V1 | `users` |
-| V2 | `addresses` |
-| V3 | `categories` |
-| V4 | `brands` |
-| V5 | `products` |
-| V6 | `carts` |
-| V7 | `cart_items` |
-| V8 | `orders` |
-| V9 | `order_items` |
-| V10 | `payments` |
-| V11 | indexes |
+```
+Controller → Service → Repository → JPA Entity → PostgreSQL
+```
+
+Controllers handle HTTP and validation only. Business rules live exclusively in service classes.
+
+### Frontend structure
+
+```
+frontend/src
+├── api           # Typed fetch wrappers per domain
+├── app           # AppLayout, Header, root providers
+├── components    # Shared UI components (ProductCard, Pagination, states)
+├── features      # Domain pages (auth, catalog, cart, checkout, orders, payment, address, profile)
+├── hooks         # useAsync, useAddToCart
+├── routes        # React Router configuration, ProtectedRoute, PublicOnlyRoute
+├── types         # TypeScript API types matching OpenAPI schemas
+├── utils         # formatCurrency (INR), formatDateTime (IST)
+└── test          # Vitest unit/component tests; Playwright e2e tests
+```
 
 ---
 
 ## Prerequisites
 
-| Tool | Version |
-|------|---------|
-| Java | 21 |
-| Maven | 3.9+ |
-| PostgreSQL | 15+ |
-| Node.js | 20 LTS |
-| npm | 10+ (bundled with Node 20) |
-| Docker Desktop | Required by Testcontainers (backend tests only) |
+- Java 21
+- Maven 3.9+
+- PostgreSQL 15+ running locally
+- Node.js 20+
+- npm 10+
+- Docker Desktop (required by Testcontainers for backend integration tests)
 
 ---
 
 ## Local Database Setup
 
-The `local` Spring profile (`application-local.yml`) provides defaults that work with a standard local PostgreSQL installation:
+The `local` Spring profile uses the following defaults (override via environment variables):
 
-| Setting | Default value |
-|---------|---------------|
-| JDBC URL | `jdbc:postgresql://localhost:5432/ebookstore` |
-| Username | `postgres` |
-| Password | `postgres` |
-| JWT secret | development fallback (do not use in production) |
-| JWT expiry | 86400000 ms (24 h) |
+| Variable | Default |
+|----------|---------|
+| `DB_URL` | `jdbc:postgresql://localhost:5432/ebookstore` |
+| `DB_USERNAME` | `postgres` |
+| `DB_PASSWORD` | `postgres` |
 
-These defaults can be overridden by setting the environment variables `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, and `JWT_EXPIRATION_MS` before starting the application.
-
-Create the database before first startup:
+Create the database before first run:
 
 ```sql
 CREATE DATABASE ebookstore;
 ```
 
-Flyway runs all migrations automatically on startup; no manual schema setup is required.
+Flyway applies all migrations automatically on startup. Hibernate is set to `ddl-auto: validate` — it never modifies the schema.
 
-> The `local` Spring profile must be active. Without it, the application expects `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, and `JWT_SECRET` to be supplied as environment variables and will fail to start if they are absent.
+To load the demo catalogue (70 books across 8 categories), run the seed script once after migrations have been applied:
+
+```powershell
+psql -U postgres -d ebookstore -f scripts/seed-demo-data.sql
+```
 
 ---
 
-## Backend Startup
-
-Run from the project root using Windows PowerShell:
+## Running the Backend
 
 ```powershell
 $env:SPRING_PROFILES_ACTIVE = "local"
 mvn spring-boot:run
 ```
 
-The backend starts on:
+The backend starts at:
 
 ```
 http://localhost:8080/api
 ```
 
-Health check endpoint:
+To override credentials without editing files:
 
-```
-http://localhost:8080/api/actuator/health
+```powershell
+$env:DB_URL      = "jdbc:postgresql://localhost:5432/ebookstore"
+$env:DB_USERNAME = "postgres"
+$env:DB_PASSWORD = "your_password"
+$env:JWT_SECRET  = "your-256-bit-or-longer-secret"
+$env:SPRING_PROFILES_ACTIVE = "local"
+mvn spring-boot:run
 ```
 
 ---
 
-## Frontend Startup
-
-Run from the project root:
+## Running the Frontend
 
 ```powershell
 cd frontend
@@ -249,33 +164,31 @@ npm install
 npm run dev
 ```
 
-The frontend is available at:
+The frontend starts at:
 
 ```
 http://localhost:5173
 ```
 
-The Vite dev server proxies all `/api` requests to `http://localhost:8080`, so no CORS configuration changes are needed during local development.
-
-> The frontend is independent of the Maven build. Running `mvn` from the project root does not install Node dependencies or build the frontend.
+Vite proxies all `/api` requests to `http://localhost:8080`, so the Spring Boot backend must be running for the application to function.
 
 ---
 
 ## API Documentation
 
-Swagger UI is available when the backend is running:
+Swagger UI is available at:
 
 ```
 http://localhost:8080/api/swagger-ui.html
 ```
 
-OpenAPI JSON:
+OpenAPI JSON is available at:
 
 ```
 http://localhost:8080/api/v3/api-docs
 ```
 
-The authoritative API contract is the hand-authored specification at [`docs/03-openapi-specification.yaml`](docs/03-openapi-specification.yaml).
+The authoritative API contract is [`docs/03-openapi-specification.yaml`](docs/03-openapi-specification.yaml).
 
 ---
 
@@ -283,37 +196,41 @@ The authoritative API contract is the hand-authored specification at [`docs/03-o
 
 ### Backend
 
-Runs both unit tests (`*Test.java`) and Testcontainers-based integration tests (`*IT.java`). Docker Desktop must be running for the integration tests.
-
 ```powershell
 mvn clean test
 ```
 
-### Frontend — unit and component tests
+Backend tests use Testcontainers to spin up a real PostgreSQL instance. Docker Desktop must be running.
+
+### Frontend unit and component tests
+
+```powershell
+cd frontend
+npm run test:run
+```
+
+### Frontend lint and build check
 
 ```powershell
 cd frontend
 npm run lint
 npm run build
-npm run test:run
 ```
 
-### Frontend — Playwright integration tests
-
-Playwright tests exercise the real application end-to-end. Both the Spring Boot backend and the Vite dev server must be running before executing:
+### Playwright integration tests
 
 ```powershell
 cd frontend
 npm run integration
 ```
 
+Playwright tests require both the Spring Boot backend and the Vite dev server to be running simultaneously before the test run begins.
+
 ---
 
-## Test Results
+## Verified Test Results
 
-The following results reflect the validated MVP state.
-
-### Backend — Maven Surefire
+### Backend
 
 | Result | Count |
 |--------|-------|
@@ -322,14 +239,15 @@ The following results reflect the validated MVP state.
 | Errors | 0 |
 | Skipped | 0 |
 
-### Frontend — Vitest (unit/component)
+### Frontend unit / component (Vitest)
 
 | Result | Count |
 |--------|-------|
-| Tests passed | 89 / 89 |
-| Test files | 10 |
+| Test files | 13 |
+| Tests passed | 115 |
+| Failures | 0 |
 
-### Frontend — Playwright
+### Frontend Playwright integration
 
 | Result | Count |
 |--------|-------|
@@ -338,48 +256,53 @@ The following results reflect the validated MVP state.
 | Skipped | 2 |
 | Failed | 0 |
 
-### Frontend — static checks
+### Frontend static checks
 
-| Check | Status |
-|-------|--------|
-| ESLint | Clean |
-| TypeScript / Vite build | Successful |
+- Lint: clean (0 errors, 0 warnings)
+- TypeScript / Vite build: successful
 
 ---
 
 ## MVP Scope Boundary
 
-The completed MVP intentionally excludes the following Phase-2 features. None of the items below have been implemented:
+The following are intentionally excluded from the current MVP and must not be treated as implemented:
 
-- **Gift points** — earning, redemption, account management, and transaction history
-- **Coupons** — coupon codes, discount calculation, and stacking rules
-- **Shipments** — shipment lifecycle, tracking, and status management
-- **Returns** — return request creation, approval, and processing
-- **Refunds** — refund calculation and processing
+- **Gift points** — no gift point earning, redemption, or transaction history
+- **Coupons** — no coupon codes or discount application
+- **Shipments** — no shipment lifecycle tracking beyond the order status field
+- **Returns** — no return request workflow
+- **Refunds** — no refund processing
 
-These domains have no controllers, services, repositories, entities, or Flyway migrations in the current codebase. They appear in the OpenAPI specification as future documentation only.
+These are documented Phase-2 features. The database schema does not contain the tables for any of the above.
 
 ---
 
 ## Important Implementation Notes
 
-- **Schema management:** Flyway owns all schema creation and evolution. Hibernate is configured with `ddl-auto: validate` and will not modify the schema.
-- **JWT:** Authentication is fully stateless. No server-side session storage is used.
-- **Monetary values:** All prices and amounts use `BigDecimal` in Java and `NUMERIC(12,2)` in PostgreSQL.
-- **Payments:** The payment processor is simulated. No real card gateway is integrated. Raw card credentials are never stored.
-- **Server authority:** The backend is authoritative for product prices, order totals, stock levels, checkout processing, payment processing, and cancellation eligibility. Client-supplied prices and totals are ignored.
-- **Order snapshots:** Order item `productTitle` and `unitPrice` are copied from the product at checkout time. The shipping address is snapshotted as seven flat columns on the `orders` row. Historical orders never depend on the current state of a product or address record.
-- **Cancellation deadline:** `cancellationDeadline = placedAt + 48 h` is persisted on the order at creation and checked server-side at cancellation time.
-- **Cart uniqueness:** `UNIQUE(cart_id, product_id)` is enforced by a database constraint. The service layer merges quantities when the same product is added to an existing cart item.
+- **Schema management**: Flyway owns the schema. Hibernate `ddl-auto` is set to `validate` only — it will reject a mismatched schema rather than silently modify it.
+- **JWT**: Stateless Bearer tokens; no server-side session state.
+- **Payments**: Fully simulated. No real payment gateway is used. No card numbers, CVV, or banking data are collected or stored.
+- **Price authority**: The backend is the sole authority for prices, order totals, stock levels, and all monetary calculations. Client-supplied prices are never trusted.
+- **Order snapshots**: `order_items.product_title` and `order_items.unit_price` are copied at checkout and never updated. Historical orders always display the price and title at the time of purchase.
+- **Shipping address snapshot**: The full 7-field shipping address is stored as flat columns on the `orders` table. Order history is independent of any subsequent changes to the user's saved addresses.
+- **Cancellation deadline**: `orders.cancellation_deadline` is set to `placed_at + 48 hours` at order creation. The service layer checks this field — the deadline is never recomputed on the fly.
+- **Cart uniqueness**: `UNIQUE(cart_id, product_id)` is enforced at the database level. Adding an existing product to the cart increments the quantity rather than inserting a duplicate row.
+- **Monetary types**: `BigDecimal` in Java, `NUMERIC(12,2)` in PostgreSQL throughout. `double` and `float` are not used for any monetary value.
 
 ---
 
 ## Repository Documentation
 
-| Document | Purpose |
-|----------|---------|
-| [`AGENTS.md`](AGENTS.md) | Project coding rules, architecture decisions, and AI workflow guidelines |
-| [`docs/01-requirements-specification.md`](docs/01-requirements-specification.md) | Functional and technical requirements baseline |
-| [`docs/02-data-model-design.md`](docs/02-data-model-design.md) | Entity design, relationships, and column definitions |
-| [`docs/03-openapi-specification.yaml`](docs/03-openapi-specification.yaml) | Authoritative REST API contract |
-| [`frontend/README.md`](frontend/README.md) | Frontend-specific setup and script reference |
+| Document | Description |
+|----------|-------------|
+| [`docs/01-requirements-specification.md`](docs/01-requirements-specification.md) | Functional and non-functional requirements |
+| [`docs/02-data-model-design.md`](docs/02-data-model-design.md) | Entity relationship model and table definitions |
+| [`docs/03-openapi-specification.yaml`](docs/03-openapi-specification.yaml) | Authoritative REST API contract (OpenAPI 3.0.3) |
+| [`AGENTS.md`](AGENTS.md) | AI development workflow rules and project coding standards |
+| [`scripts/seed-demo-data.sql`](scripts/seed-demo-data.sql) | Optional demo catalogue seed (70 books, 8 categories, 40 publishers) |
+
+---
+
+## Project Status
+
+The full-stack MVP is complete and validated. All backend and frontend tests pass. The application covers the complete customer journey from registration through catalog browsing, cart management, address management, checkout, payment, and order history.

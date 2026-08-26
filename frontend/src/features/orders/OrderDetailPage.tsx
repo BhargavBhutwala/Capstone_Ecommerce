@@ -28,6 +28,8 @@ import { useAsync } from '../../hooks/useAsync'
 import { LoadingSpinner } from '../../components/states/LoadingSpinner'
 import { ErrorState } from '../../components/states/ErrorState'
 import type { OrderResponse, OrderStatus } from '../../types/api'
+import { formatCurrency } from '../../utils/formatCurrency'
+import { formatDateTime } from '../../utils/formatDateTime'
 import styles from './OrderDetailPage.module.css'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -37,17 +39,6 @@ function statusLabel(s: OrderStatus): string {
     .toLowerCase()
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
-function formatDateTime(iso: string): string {
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(iso))
-  } catch {
-    return iso
-  }
 }
 
 /**
@@ -228,8 +219,8 @@ export function OrderDetailPage() {
               <div key={item.id} className={styles.itemRow}>
                 <span className={styles.itemTitle}>{item.productTitle}</span>
                 <span className={styles.colRight}>{item.quantity}</span>
-                <span className={styles.colRight}>${item.unitPrice.toFixed(2)}</span>
-                <span className={styles.colRight}>${item.subtotal.toFixed(2)}</span>
+                <span className={styles.colRight}>{formatCurrency(item.unitPrice)}</span>
+                <span className={styles.colRight}>{formatCurrency(item.subtotal)}</span>
               </div>
             ))}
           </div>
@@ -238,23 +229,23 @@ export function OrderDetailPage() {
           <div className={styles.totals}>
             <div className={styles.totalRow}>
               <span>Subtotal</span>
-              <span>${order.subtotal.toFixed(2)}</span>
+              <span>{formatCurrency(order.subtotal)}</span>
             </div>
             {order.shippingAmount !== undefined && order.shippingAmount > 0 && (
               <div className={styles.totalRow}>
                 <span>Shipping</span>
-                <span>${order.shippingAmount.toFixed(2)}</span>
+                <span>{formatCurrency(order.shippingAmount)}</span>
               </div>
             )}
             {order.discountAmount !== undefined && order.discountAmount > 0 && (
               <div className={styles.totalRow}>
                 <span>Discount</span>
-                <span>−${order.discountAmount.toFixed(2)}</span>
+                <span>−{formatCurrency(order.discountAmount)}</span>
               </div>
             )}
             <div className={`${styles.totalRow} ${styles.grandTotal}`}>
               <span>Total</span>
-              <span>${order.totalAmount.toFixed(2)}</span>
+              <span>{formatCurrency(order.totalAmount)}</span>
             </div>
           </div>
         </section>

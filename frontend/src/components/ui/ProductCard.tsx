@@ -19,6 +19,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { ProductSummary } from '../../types/api'
+import { formatCurrency } from '../../utils/formatCurrency'
 import styles from './ProductCard.module.css'
 
 interface ProductCardProps {
@@ -101,7 +102,7 @@ export function ProductCard({
 
           <div className={styles.bottomInfo}>
             <p className={styles.price}>
-              ${product.price.toFixed(2)}
+              {formatCurrency(product.price)}
             </p>
 
             <span

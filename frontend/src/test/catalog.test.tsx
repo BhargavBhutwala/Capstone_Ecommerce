@@ -89,7 +89,7 @@ describe('Catalog — public access without auth token', () => {
     vi.spyOn(catalogApi, 'searchProducts').mockResolvedValue(emptyProducts)
     renderProductList()
     await waitFor(() => {
-      expect(screen.getByText(/no products found/i)).toBeInTheDocument()
+      expect(screen.getByText(/no books found/i)).toBeInTheDocument()
     })
   })
 

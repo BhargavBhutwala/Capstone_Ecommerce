@@ -18,6 +18,8 @@ import { ErrorState } from '../../components/states/ErrorState'
 import { EmptyState } from '../../components/states/EmptyState'
 import { Pagination } from '../../components/ui/Pagination'
 import type { OrderStatus } from '../../types/api'
+import { formatCurrency } from '../../utils/formatCurrency'
+import { formatDate } from '../../utils/formatDateTime'
 import styles from './OrdersPage.module.css'
 
 // All documented OrderStatus values — used to build the filter dropdown
@@ -38,14 +40,6 @@ function statusLabel(s: OrderStatus): string {
     .toLowerCase()
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase())
-}
-
-function formatDate(iso: string): string {
-  try {
-    return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(iso))
-  } catch {
-    return iso
-  }
 }
 
 const DEFAULT_SIZE = 20
@@ -132,7 +126,7 @@ export function OrdersPage() {
                     )}
                     <span>{order.items.length} item{order.items.length !== 1 ? 's' : ''}</span>
                     <span className={styles.total}>
-                      ${order.totalAmount.toFixed(2)}
+                      {formatCurrency(order.totalAmount)}
                     </span>
                   </div>
                 </Link>

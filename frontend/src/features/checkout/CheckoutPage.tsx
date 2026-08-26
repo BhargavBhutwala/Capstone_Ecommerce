@@ -25,6 +25,7 @@ import { useAsync } from '../../hooks/useAsync'
 import { LoadingSpinner } from '../../components/states/LoadingSpinner'
 import { ErrorState } from '../../components/states/ErrorState'
 import type { AddressResponse } from '../../types/api'
+import { formatCurrency } from '../../utils/formatCurrency'
 import styles from './CheckoutPage.module.css'
 
 export function CheckoutPage() {
@@ -128,10 +129,10 @@ export function CheckoutPage() {
               <li key={item.id} className={styles.item}>
                 <span className={styles.itemTitle}>{item.product.title}</span>
                 <span className={styles.itemMeta}>
-                  {item.quantity} × ${item.unitPrice.toFixed(2)}
+                  {item.quantity} × {formatCurrency(item.unitPrice)}
                 </span>
                 <span className={styles.itemSubtotal}>
-                  ${item.subtotal.toFixed(2)}
+                  {formatCurrency(item.subtotal)}
                 </span>
               </li>
             ))}
@@ -140,11 +141,11 @@ export function CheckoutPage() {
           <div className={styles.totals}>
             <div className={styles.totalRow}>
               <span>Subtotal</span>
-              <span>${cart.subtotal.toFixed(2)}</span>
+              <span>{formatCurrency(cart.subtotal)}</span>
             </div>
             <div className={`${styles.totalRow} ${styles.grandTotal}`}>
               <span>Total</span>
-              <span>${cart.totalAmount.toFixed(2)}</span>
+              <span>{formatCurrency(cart.totalAmount)}</span>
             </div>
           </div>
 

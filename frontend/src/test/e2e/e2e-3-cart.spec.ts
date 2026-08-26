@@ -57,7 +57,9 @@ test.describe('E2E-3: Cart', () => {
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 10_000 })
 
     // Totals are rendered from backend (numeric value visible)
-    await expect(page.locator('text=/\\$\\d+\\.\\d{2}/').first()).toBeVisible({ timeout: 5_000 })
+    await expect(
+      page.getByText(/₹[\d,]+\.\d{2}/).first(),
+    ).toBeVisible({ timeout: 5_000 })
 
     // Remove item
     const removeBtn = page.locator('button', { hasText: /remove/i }).first()

@@ -108,7 +108,8 @@ describe('PaymentPage', () => {
     renderPayment()
     await userEvent.click(screen.getByRole('button', { name: /pay now/i }))
     await waitFor(() => {
-      expect(screen.getByText('$29.99')).toBeInTheDocument()
+      // Amount rendered via formatCurrency (INR) — ₹29.99
+      expect(screen.getByText('₹29.99')).toBeInTheDocument()
     })
   })
 

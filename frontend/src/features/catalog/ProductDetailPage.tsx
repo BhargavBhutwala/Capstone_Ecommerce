@@ -20,7 +20,7 @@
  * Public endpoint — no auth required for the page itself.
  */
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as catalogApi from '../../api/catalogApi'
 import { ApiError } from '../../api/client'
@@ -29,6 +29,7 @@ import { useAddToCart } from '../../hooks/useAddToCart'
 import { LoadingSpinner } from '../../components/states/LoadingSpinner'
 import { ErrorState } from '../../components/states/ErrorState'
 import { ProductGrid } from '../../components/ui/ProductGrid'
+import { formatCurrency } from '../../utils/formatCurrency'
 import styles from './ProductDetailPage.module.css'
 
 export function ProductDetailPage() {
@@ -40,8 +41,9 @@ export function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1)
   const [addedMessage, setAddedMessage] = useState<string | null>(null)
 
-  // Tracks remote cover-image failures so a clean fallback can be shown.
-  const [imageFailed, setImageFailed] = useState(false)
+  // Tracks which image URL has failed so a fallback is shown for that URL only.
+  // Avoids a synchronous setState-in-effect that would trigger cascading renders.
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null)
 
   // Wrap the getProduct call to translate ApiError 404 into a recognisable error
   const productState = useAsync(async () => {
@@ -66,11 +68,6 @@ export function ProductDetailPage() {
     () => catalogApi.getRelatedProducts(id, 8),
     [id],
   )
-
-  // Reset the image failure state when navigating between products.
-  useEffect(() => {
-    setImageFailed(false)
-  }, [id, productState.data?.imageUrl])
 
   // ── Loading ───────────────────────────────────────────────────────────────
   if (productState.loading) {
@@ -161,12 +158,12 @@ export function ProductDetailPage() {
           {/* ── Book cover ── */}
           <div className={styles.coverColumn}>
             <div className={styles.coverFrame}>
-              {product.imageUrl && !imageFailed ? (
+              {product.imageUrl && failedImageUrl !== product.imageUrl ? (
                 <img
                   src={product.imageUrl}
                   alt={`${product.title} cover`}
                   className={styles.coverImage}
-                  onError={() => setImageFailed(true)}
+                  onError={() => setFailedImageUrl(product.imageUrl ?? null)}
                 />
               ) : (
                 <div
@@ -226,7 +223,7 @@ export function ProductDetailPage() {
             )}
 
             <p className={styles.price}>
-              ${product.price.toFixed(2)}
+              {formatCurrency(product.price)}
             </p>
 
             <p

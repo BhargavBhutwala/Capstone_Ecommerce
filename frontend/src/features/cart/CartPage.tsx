@@ -26,6 +26,7 @@ import { ErrorState } from '../../components/states/ErrorState'
 import { EmptyState } from '../../components/states/EmptyState'
 import { ProductGrid } from '../../components/ui/ProductGrid'
 import type { CartResponse, CartItemResponse } from '../../types/api'
+import { formatCurrency } from '../../utils/formatCurrency'
 import styles from './CartPage.module.css'
 
 // ─── CartItemRow ──────────────────────────────────────────────────────────────
@@ -72,7 +73,7 @@ function CartItemRow({ item, onQuantityChange, onRemove, rowError }: CartItemRow
           <span className={styles.itemIsbn}>ISBN: {item.product.isbn}</span>
         )}
         <span className={styles.itemUnitPrice}>
-          ${item.unitPrice.toFixed(2)} each
+          {formatCurrency(item.unitPrice)} each
         </span>
       </div>
 
@@ -102,7 +103,7 @@ function CartItemRow({ item, onQuantityChange, onRemove, rowError }: CartItemRow
       </div>
 
       <div className={styles.itemSubtotal}>
-        ${item.subtotal.toFixed(2)}
+        {formatCurrency(item.subtotal)}
       </div>
 
       {rowError && (
@@ -281,11 +282,11 @@ export function CartPage() {
       <div className={styles.summary}>
         <div className={styles.summaryRow}>
           <span>Subtotal</span>
-          <span>${displayCart.subtotal.toFixed(2)}</span>
+          <span>{formatCurrency(displayCart.subtotal)}</span>
         </div>
         <div className={`${styles.summaryRow} ${styles.summaryTotal}`}>
           <span>Total</span>
-          <span>${displayCart.totalAmount.toFixed(2)}</span>
+          <span>{formatCurrency(displayCart.totalAmount)}</span>
         </div>
         {/* Checkout link — navigation only; checkout implemented in FE-05 */}
         <Link to="/checkout" className={styles.checkoutBtn}>

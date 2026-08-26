@@ -82,9 +82,10 @@ describe('CartPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Your cart')).toBeInTheDocument()
     })
-    // Server-returned totals appear in the summary section (multiple $19.99 values are expected)
-    const amounts = screen.getAllByText('$19.99')
-    expect(amounts.length).toBeGreaterThanOrEqual(2) // unit price + subtotal + summary rows
+    // Server-returned totals appear in the summary section — rendered as INR via formatCurrency
+    // Multiple ₹19.99 values are expected (unit price + item subtotal + summary rows)
+    const amounts = screen.getAllByText('₹19.99')
+    expect(amounts.length).toBeGreaterThanOrEqual(2)
     // Total row must include the server-returned totalAmount
     expect(screen.getByText('Total')).toBeInTheDocument()
   })
