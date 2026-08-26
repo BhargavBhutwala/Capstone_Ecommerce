@@ -1,8 +1,8 @@
 /**
  * ProductDetailPage — full product detail with related products.
  *
- * operationId: getProduct            → GET /products/{productId}
- * operationId: getRelatedProducts    → GET /products/{productId}/related
+ * operationId: getProduct         → GET /products/{productId}
+ * operationId: getRelatedProducts → GET /products/{productId}/related
  *
  * FE-04: includes Add-to-Cart action (POST /cart/items via useAddToCart).
  * - Authenticated users: quantity input + Add to Cart button.
@@ -12,6 +12,7 @@
  * Handles:
  * - loading state
  * - valid product display (available and unavailable)
+ * - product cover image with fallback
  * - 404 / unknown product (ApiError.isNotFound)
  * - general API failure with retry
  * - related products section (empty handled gracefully)
@@ -19,7 +20,7 @@
  * Public endpoint — no auth required for the page itself.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as catalogApi from '../../api/catalogApi'
 import { ApiError } from '../../api/client'
@@ -36,10 +37,11 @@ export function ProductDetailPage() {
 
   const { addToCart, isAdding, getError, clearError } = useAddToCart()
 
-  // Quantity for the "Add to Cart" action on the detail page
   const [quantity, setQuantity] = useState(1)
-  // Success feedback message
   const [addedMessage, setAddedMessage] = useState<string | null>(null)
+
+  // Tracks remote cover-image failures so a clean fallback can be shown.
+  const [imageFailed, setImageFailed] = useState(false)
 
   // Wrap the getProduct call to translate ApiError 404 into a recognisable error
   const productState = useAsync(async () => {
@@ -47,16 +49,28 @@ export function ProductDetailPage() {
       return await catalogApi.getProduct(id)
     } catch (err) {
       if (err instanceof ApiError && err.isNotFound) {
-        const notFound = new Error('PRODUCT_NOT_FOUND') as Error & { cause?: unknown }
+        const notFound = new Error('PRODUCT_NOT_FOUND') as Error & {
+          cause?: unknown
+        }
+
         notFound.cause = err
         throw notFound
       }
+
       throw err
     }
   }, [id])
 
   // Related products fetched independently — failures shown inline only
-  const relatedState = useAsync(() => catalogApi.getRelatedProducts(id, 8), [id])
+  const relatedState = useAsync(
+    () => catalogApi.getRelatedProducts(id, 8),
+    [id],
+  )
+
+  // Reset the image failure state when navigating between products.
+  useEffect(() => {
+    setImageFailed(false)
+  }, [id, productState.data?.imageUrl])
 
   // ── Loading ───────────────────────────────────────────────────────────────
   if (productState.loading) {
@@ -68,7 +82,11 @@ export function ProductDetailPage() {
     return (
       <div className={styles.notFound}>
         <h1 className={styles.notFoundCode}>404</h1>
-        <p className={styles.notFoundMsg}>This product does not exist.</p>
+
+        <p className={styles.notFoundMsg}>
+          This product does not exist.
+        </p>
+
         <Link to="/products" className={styles.backLink}>
           Back to products
         </Link>
@@ -78,158 +96,282 @@ export function ProductDetailPage() {
 
   // ── General error ─────────────────────────────────────────────────────────
   if (productState.error) {
-    return <ErrorState message={productState.error} onRetry={productState.reload} />
+    return (
+      <ErrorState
+        message={productState.error}
+        onRetry={productState.reload}
+      />
+    )
   }
 
   const product = productState.data
-  if (!product) return null
+
+  if (!product) {
+    return null
+  }
 
   const addToCartError = getError(id)
 
   async function handleAddToCart() {
     clearError(id)
     setAddedMessage(null)
+
     await addToCart(id, quantity, () => {
-      // onSuccess callback — called by the hook only on a successful API response
       setAddedMessage('Added to cart!')
-      setTimeout(() => setAddedMessage(null), 3000)
+
+      setTimeout(() => {
+        setAddedMessage(null)
+      }, 3000)
     })
   }
 
   return (
     <div className={styles.page}>
       {/* ── Breadcrumb ── */}
-      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+      <nav
+        className={styles.breadcrumb}
+        aria-label="Breadcrumb"
+      >
         <Link to="/">Home</Link>
-        <span> / </span>
+
+        <span>/</span>
+
         <Link to="/products">Products</Link>
+
         {product.category && (
           <>
-            <span> / </span>
+            <span>/</span>
+
             <Link to={`/categories/${product.category.id}`}>
               {product.category.name}
             </Link>
           </>
         )}
-        <span> / </span>
-        <span className={styles.breadcrumbCurrent}>{product.title}</span>
+
+        <span>/</span>
+
+        <span className={styles.breadcrumbCurrent}>
+          {product.title}
+        </span>
       </nav>
 
-      {/* ── Main detail ── */}
+      {/* ── Product detail ── */}
       <div className={styles.detail}>
-        <div className={styles.info}>
-          <h1 className={styles.title}>{product.title}</h1>
-
-          {product.isbn && (
-            <p className={styles.isbn}>ISBN: {product.isbn}</p>
-          )}
-
-          {product.brand && (
-            <p className={styles.metaLine}>
-              <span className={styles.metaKey}>Publisher</span>
-              <Link to={`/brands/${product.brand.id}`} className={styles.metaLink}>
-                {product.brand.name}
-              </Link>
-            </p>
-          )}
-
-          {product.category && (
-            <p className={styles.metaLine}>
-              <span className={styles.metaKey}>Category</span>
-              <Link to={`/categories/${product.category.id}`} className={styles.metaLink}>
-                {product.category.name}
-              </Link>
-            </p>
-          )}
-
-          <p className={styles.price}>${product.price.toFixed(2)}</p>
-
-          <p className={product.available ? styles.inStock : styles.outOfStock}>
-            {product.available
-              ? product.stockQuantity !== undefined
-                ? `In stock · ${product.stockQuantity} available`
-                : 'In stock'
-              : 'Currently unavailable'}
-          </p>
-
-          {product.deliveryEstimate && (
-            <p className={styles.delivery}>
-              Estimated delivery:{' '}
-              {product.deliveryEstimate.minDays}–{product.deliveryEstimate.maxDays} business days
-            </p>
-          )}
-
-          {/* ── Add to Cart action ── */}
-          <div className={styles.cartSection}>
-            {product.available && (
-              <div className={styles.cartControls}>
-                <label htmlFor="detail-qty" className={styles.qtyLabel}>
-                  Qty:
-                </label>
-                <input
-                  id="detail-qty"
-                  type="number"
-                  min={1}
-                  max={999}
-                  value={quantity}
-                  onChange={(e) => {
-                    const v = parseInt(e.target.value, 10)
-                    if (!isNaN(v) && v >= 1 && v <= 999) setQuantity(v)
-                  }}
-                  className={styles.qtyInput}
-                  disabled={isAdding(id)}
-                  aria-label="Quantity"
+        <div className={styles.mainContent}>
+          {/* ── Book cover ── */}
+          <div className={styles.coverColumn}>
+            <div className={styles.coverFrame}>
+              {product.imageUrl && !imageFailed ? (
+                <img
+                  src={product.imageUrl}
+                  alt={`${product.title} cover`}
+                  className={styles.coverImage}
+                  onError={() => setImageFailed(true)}
                 />
-                <button
-                  className={styles.addToCartBtn}
-                  onClick={handleAddToCart}
-                  disabled={isAdding(id)}
+              ) : (
+                <div
+                  className={styles.coverPlaceholder}
+                  aria-label={`No cover available for ${product.title}`}
                 >
-                  {isAdding(id) ? 'Adding…' : 'Add to Cart'}
-                </button>
-              </div>
-            )}
-            {!product.available && (
-              <p className={styles.unavailableNote}>
-                This product is currently unavailable and cannot be added to the cart.
+                  <span className={styles.placeholderIcon}>📖</span>
+
+                  <span className={styles.placeholderText}>
+                    No cover available
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── Product information ── */}
+          <div className={styles.info}>
+            <h1 className={styles.title}>
+              {product.title}
+            </h1>
+
+            {product.isbn && (
+              <p className={styles.isbn}>
+                ISBN: {product.isbn}
               </p>
             )}
-            {addedMessage && (
-              <p className={styles.addedMsg} role="status">
-                {addedMessage}
+
+            {product.brand && (
+              <p className={styles.metaLine}>
+                <span className={styles.metaKey}>
+                  Publisher
+                </span>
+
+                <Link
+                  to={`/brands/${product.brand.id}`}
+                  className={styles.metaLink}
+                >
+                  {product.brand.name}
+                </Link>
               </p>
             )}
-            {addToCartError && (
-              <p className={styles.addToCartError} role="alert">
-                {addToCartError}
+
+            {product.category && (
+              <p className={styles.metaLine}>
+                <span className={styles.metaKey}>
+                  Category
+                </span>
+
+                <Link
+                  to={`/categories/${product.category.id}`}
+                  className={styles.metaLink}
+                >
+                  {product.category.name}
+                </Link>
               </p>
             )}
+
+            <p className={styles.price}>
+              ${product.price.toFixed(2)}
+            </p>
+
+            <p
+              className={
+                product.available
+                  ? styles.inStock
+                  : styles.outOfStock
+              }
+            >
+              {product.available
+                ? product.stockQuantity !== undefined
+                  ? `In stock · ${product.stockQuantity} available`
+                  : 'In stock'
+                : 'Currently unavailable'}
+            </p>
+
+            {product.deliveryEstimate && (
+              <p className={styles.delivery}>
+                Estimated delivery:{' '}
+                {product.deliveryEstimate.minDays}–
+                {product.deliveryEstimate.maxDays} business days
+              </p>
+            )}
+
+            {/* ── Add to Cart ── */}
+            <div className={styles.cartSection}>
+              {product.available && (
+                <div className={styles.cartControls}>
+                  <label
+                    htmlFor="detail-qty"
+                    className={styles.qtyLabel}
+                  >
+                    Qty:
+                  </label>
+
+                  <input
+                    id="detail-qty"
+                    type="number"
+                    min={1}
+                    max={999}
+                    value={quantity}
+                    onChange={(event) => {
+                      const value = parseInt(
+                        event.target.value,
+                        10,
+                      )
+
+                      if (
+                        !Number.isNaN(value) &&
+                        value >= 1 &&
+                        value <= 999
+                      ) {
+                        setQuantity(value)
+                      }
+                    }}
+                    className={styles.qtyInput}
+                    disabled={isAdding(id)}
+                    aria-label="Quantity"
+                  />
+
+                  <button
+                    type="button"
+                    className={styles.addToCartBtn}
+                    onClick={handleAddToCart}
+                    disabled={isAdding(id)}
+                  >
+                    {isAdding(id)
+                      ? 'Adding…'
+                      : 'Add to Cart'}
+                  </button>
+                </div>
+              )}
+
+              {!product.available && (
+                <p className={styles.unavailableNote}>
+                  This product is currently unavailable and
+                  cannot be added to the cart.
+                </p>
+              )}
+
+              {addedMessage && (
+                <p
+                  className={styles.addedMsg}
+                  role="status"
+                >
+                  {addedMessage}
+                </p>
+              )}
+
+              {addToCartError && (
+                <p
+                  className={styles.addToCartError}
+                  role="alert"
+                >
+                  {addToCartError}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
+        {/* ── Description ── */}
         {product.description && (
           <div className={styles.description}>
-            <h2 className={styles.descTitle}>Description</h2>
-            <p className={styles.descText}>{product.description}</p>
+            <h2 className={styles.descTitle}>
+              Description
+            </h2>
+
+            <p className={styles.descText}>
+              {product.description}
+            </p>
           </div>
         )}
       </div>
 
       {/* ── Related products ── */}
       <section className={styles.related}>
-        <h2 className={styles.relatedTitle}>Related products</h2>
+        <h2 className={styles.relatedTitle}>
+          Related products
+        </h2>
+
         {relatedState.loading && (
           <LoadingSpinner label="Loading related products…" />
         )}
+
         {!relatedState.loading && relatedState.error && (
-          <p className={styles.relatedNote}>Related products unavailable.</p>
+          <p className={styles.relatedNote}>
+            Related products unavailable.
+          </p>
         )}
-        {!relatedState.loading && !relatedState.error && relatedState.data?.length === 0 && (
-          <p className={styles.relatedNote}>No related products found.</p>
-        )}
-        {!relatedState.loading && !relatedState.error && relatedState.data && relatedState.data.length > 0 && (
-          <ProductGrid products={relatedState.data} />
-        )}
+
+        {!relatedState.loading &&
+          !relatedState.error &&
+          relatedState.data?.length === 0 && (
+            <p className={styles.relatedNote}>
+              No related products found.
+            </p>
+          )}
+
+        {!relatedState.loading &&
+          !relatedState.error &&
+          relatedState.data &&
+          relatedState.data.length > 0 && (
+            <ProductGrid products={relatedState.data} />
+          )}
       </section>
     </div>
   )

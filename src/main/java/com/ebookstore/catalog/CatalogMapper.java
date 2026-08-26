@@ -29,7 +29,7 @@ public final class CatalogMapper {
     public static ProductSummary toSummary(Product p) {
         boolean available = p.isActive() && p.getStockQuantity() != null && p.getStockQuantity() > 0;
         return new ProductSummary(
-                p.getId(), p.getTitle(), p.getIsbn(), p.getPrice(), available, p.getStockQuantity());
+                p.getId(), p.getTitle(), p.getIsbn(), p.getPrice(), available, p.getStockQuantity(), p.getImageUrl());
     }
 
     public static ProductResponse toResponse(Product p) {
@@ -41,6 +41,7 @@ public final class CatalogMapper {
                 p.getId(), p.getTitle(), p.getIsbn(), p.getPrice(),
                 available, p.getStockQuantity(),
                 p.getDescription(),
+                p.getImageUrl(),
                 toSummary(p.getCategory()),
                 toSummary(p.getBrand()),
                 estimate);

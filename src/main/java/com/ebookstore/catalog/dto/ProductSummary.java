@@ -18,19 +18,22 @@ public class ProductSummary {
     private final BigDecimal price;
     private final boolean available;
     private final Integer stockQuantity;
+    private final String imageUrl;
 
     public ProductSummary(Long id,
                           String title,
                           String isbn,
                           BigDecimal price,
                           boolean available,
-                          Integer stockQuantity) {
+                          Integer stockQuantity,
+                          String imageUrl) {
         this.id = id;
         this.title = title;
         this.isbn = isbn;
         this.price = price;
         this.available = available;
         this.stockQuantity = stockQuantity;
+        this.imageUrl = imageUrl;
     }
 
     public Long getId()             { return id; }
@@ -39,4 +42,5 @@ public class ProductSummary {
     public BigDecimal getPrice()    { return price; }
     public boolean isAvailable()    { return available; }
     public Integer getStockQuantity(){ return stockQuantity; }
+    public String getImageUrl()     { return imageUrl; }
 }

@@ -89,6 +89,7 @@ export interface ProductSummary {
   available: boolean
   isbn?: string
   stockQuantity?: number
+  imageUrl?: string | null
 }
 
 /**

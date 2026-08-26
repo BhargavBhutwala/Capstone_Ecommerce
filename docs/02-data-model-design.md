@@ -263,6 +263,7 @@ Represents books/products that can be browsed, selected, added to a cart, and pu
 | `title` | `VARCHAR(255)` | NOT NULL | Book/product title |
 | `isbn` | `VARCHAR(20)` | UNIQUE | ISBN when applicable |
 | `description` | `TEXT` | | Product description |
+| `image_url` | `VARCHAR(1000)` | | URL of the product/book cover image |
 | `price` | `NUMERIC(12,2)` | NOT NULL, >= 0 | Current catalogue price |
 | `stock_quantity` | `INTEGER` | NOT NULL, >= 0 | Available inventory |
 | `category_id` | `BIGINT` | FK, NOT NULL | Product category |

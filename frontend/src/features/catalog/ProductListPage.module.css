@@ -1,26 +1,22 @@
 .layout {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 240px minmax(0, 1fr);
   gap: 2rem;
   align-items: start;
 }
 
-@media (max-width: 700px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
 
 .sidebar {
   background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 1.25rem;
+
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
   position: sticky;
   top: 72px;
 }
@@ -29,7 +25,7 @@
   font-size: 1rem;
   font-weight: 700;
   color: #1f2328;
-  margin-bottom: 0.25rem;
+  margin: 0 0 0.25rem;
 }
 
 .filterGroup {
@@ -39,44 +35,71 @@
 }
 
 .filterLabel {
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: #57606a;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 .filterInput {
-  padding: 0.4rem 0.625rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  outline: none;
   width: 100%;
   box-sizing: border-box;
+
+  padding: 0.5rem 0.625rem;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  background: #fff;
+  color: #1f2328;
+
+  font-size: 0.875rem;
+
+  outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .filterInput:focus {
   border-color: #3b82d4;
+  box-shadow: 0 0 0 2px rgba(59, 130, 212, 0.12);
 }
 
 .checkLabel {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
   font-size: 0.875rem;
+  color: #1f2328;
+
+  cursor: pointer;
+}
+
+.checkLabel input {
+  width: 16px;
+  height: 16px;
   cursor: pointer;
 }
 
 .applyBtn {
   background: #1a1a2e;
   color: #fff;
+
   border: none;
   border-radius: 6px;
-  padding: 0.5rem;
+
+  padding: 0.55rem 0.75rem;
+
   font-size: 0.875rem;
   font-weight: 600;
+
   cursor: pointer;
+
+  transition: background 0.15s ease;
 }
 
 .applyBtn:hover {
@@ -85,12 +108,20 @@
 
 .clearBtn {
   background: none;
+
   border: 1px solid #e5e7eb;
   border-radius: 6px;
-  padding: 0.4rem;
+
+  padding: 0.45rem 0.75rem;
+
   font-size: 0.8rem;
   color: #57606a;
+
   cursor: pointer;
+
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .clearBtn:hover {
@@ -105,48 +136,190 @@
 }
 
 .activeFilter {
+  margin: 0;
+
   font-size: 0.8rem;
+  line-height: 1.5;
+
   color: #57606a;
 }
 
 .removeLink {
   color: #dc2626;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* ── Results ──────────────────────────────────────────────────────────────── */
+.removeLink:hover {
+  text-decoration: underline;
+}
+
+/* ── Results ─────────────────────────────────────────────────────────────── */
 
 .results {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
 
 .toolbar {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
+
   flex-wrap: wrap;
-  gap: 0.75rem;
+
+  gap: 1rem;
+
+  padding-bottom: 1rem;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.headingGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .pageTitle {
-  font-size: 1.375rem;
-  font-weight: 700;
+  margin: 0;
+
+  font-size: 1.5rem;
+  font-weight: 750;
+
+  line-height: 1.25;
+
   color: #1f2328;
 }
 
+.resultCount {
+  margin: 0;
+
+  font-size: 0.85rem;
+
+  color: #6b7280;
+}
+
+/* ── Sort controls ───────────────────────────────────────────────────────── */
+
+.sortGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sortLabel {
+  font-size: 0.8rem;
+  font-weight: 500;
+
+  color: #57606a;
+
+  white-space: nowrap;
+}
+
 .sortSelect {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+
+  border: 1px solid #d1d5db;
   border-radius: 6px;
+
   font-size: 0.875rem;
+
+  color: #1f2328;
   background: #fff;
+
   cursor: pointer;
   outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .sortSelect:focus {
   border-color: #3b82d4;
+  box-shadow: 0 0 0 2px rgba(59, 130, 212, 0.12);
+}
+
+/* ── Product content ─────────────────────────────────────────────────────── */
+
+.productArea {
+  min-width: 0;
+  width: 100%;
+}
+
+.stateArea {
+  width: 100%;
+  min-height: 240px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Tablet ──────────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+
+  .sidebar {
+    padding: 1rem;
+  }
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────── */
+
+@media (max-width: 700px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .sidebar {
+    position: static;
+    top: auto;
+  }
+
+  .toolbar {
+    align-items: flex-start;
+  }
+
+  .sortGroup {
+    width: 100%;
+  }
+
+  .sortSelect {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    padding: 1rem;
+  }
+
+  .pageTitle {
+    font-size: 1.3rem;
+  }
+
+  .toolbar {
+    gap: 0.75rem;
+  }
+
+  .sortGroup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sortLabel {
+    font-size: 0.75rem;
+  }
 }

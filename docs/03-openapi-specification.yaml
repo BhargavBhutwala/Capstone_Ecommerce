@@ -1005,6 +1005,11 @@ components:
         stockQuantity:
           type: integer
           minimum: 0
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://covers.openlibrary.org/b/isbn/9780132350884-L.jpg
 
     ProductResponse:
       allOf:

@@ -15,6 +15,7 @@ public class ProductResponse {
     private final boolean available;
     private final Integer stockQuantity;
     private final String description;
+    private final String imageUrl;
     private final CategorySummary category;
     private final BrandSummary brand;
     private final DeliveryEstimate deliveryEstimate;
@@ -26,6 +27,7 @@ public class ProductResponse {
                            boolean available,
                            Integer stockQuantity,
                            String description,
+                           String imageUrl,
                            CategorySummary category,
                            BrandSummary brand,
                            DeliveryEstimate deliveryEstimate) {
@@ -36,6 +38,7 @@ public class ProductResponse {
         this.available = available;
         this.stockQuantity = stockQuantity;
         this.description = description;
+        this.imageUrl = imageUrl;
         this.category = category;
         this.brand = brand;
         this.deliveryEstimate = deliveryEstimate;
@@ -48,6 +51,7 @@ public class ProductResponse {
     public boolean isAvailable()               { return available; }
     public Integer getStockQuantity()          { return stockQuantity; }
     public String getDescription()             { return description; }
+    public String getImageUrl()                { return imageUrl; }
     public CategorySummary getCategory()       { return category; }
     public BrandSummary getBrand()             { return brand; }
     public DeliveryEstimate getDeliveryEstimate(){ return deliveryEstimate; }

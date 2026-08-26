@@ -1,101 +1,297 @@
 .card {
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
   background: #fff;
+
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 10px;
+
   overflow: hidden;
-  transition: box-shadow 0.15s, border-color 0.15s;
+
+  transition:
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
 }
 
 .card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-color: #3b82d4;
+  border-color: #c7d8ed;
+
+  box-shadow:
+    0 2px 6px rgba(31, 35, 40, 0.06),
+    0 10px 24px rgba(31, 35, 40, 0.09);
+
+  transform: translateY(-2px);
 }
+
+/* ── Main product link ───────────────────────────────────────────────────── */
 
 .link {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  height: 100%;
-}
+  flex: 1;
 
-.body {
-  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ── Book cover ──────────────────────────────────────────────────────────── */
+
+.imageWrapper {
+  position: relative;
+
+  width: 100%;
+
+  aspect-ratio: 2 / 3;
+
+  overflow: hidden;
+
+  background: #f6f8fa;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  transition: transform 0.2s ease;
+}
+
+.card:hover .image {
+  transform: scale(1.015);
+}
+
+/* ── Missing/broken image fallback ───────────────────────────────────────── */
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+
+  min-height: 220px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.5rem;
+
+  padding: 1rem;
+
+  box-sizing: border-box;
+
+  text-align: center;
+
+  background:
+    linear-gradient(
+      145deg,
+      #f8fafc,
+      #eef2f6
+    );
+
+  color: #8b949e;
+}
+
+.placeholderIcon {
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.placeholderText {
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+/* ── Unavailable cover badge ─────────────────────────────────────────────── */
+
+.unavailableBadge {
+  position: absolute;
+
+  top: 0.625rem;
+  right: 0.625rem;
+
+  padding: 0.25rem 0.5rem;
+
+  border-radius: 999px;
+
+  background: rgba(127, 29, 29, 0.92);
+  color: #fff;
+
+  font-size: 0.7rem;
+  font-weight: 600;
+
+  letter-spacing: 0.01em;
+}
+
+/* ── Product information ────────────────────────────────────────────────── */
+
+.body {
+  flex: 1;
+
+  padding: 0.9rem 1rem;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.4rem;
 }
 
 .title {
+  margin: 0;
+
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 650;
+
   color: #1f2328;
+
   line-height: 1.4;
-  /* Clamp to 3 lines */
+
+  /* Clamp long book titles to three lines */
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+
   overflow: hidden;
 }
 
 .isbn {
-  font-size: 0.75rem;
+  margin: 0;
+
+  font-size: 0.72rem;
+
   color: #8b949e;
 }
 
+.bottomInfo {
+  margin-top: auto;
+  padding-top: 0.4rem;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.25rem;
+}
+
 .price {
-  font-size: 1rem;
+  margin: 0;
+
+  font-size: 1.05rem;
   font-weight: 700;
+
   color: #1a1a2e;
-  margin-top: 0.25rem;
 }
 
 .available {
   font-size: 0.75rem;
-  color: #16a34a;
   font-weight: 500;
+
+  color: #16a34a;
 }
 
 .unavailable {
   font-size: 0.75rem;
-  color: #dc2626;
   font-weight: 500;
+
+  color: #dc2626;
 }
 
-/* ── Add to Cart action (FE-04) ─────────────────────────────────────────── */
+/* ── Add to Cart action ──────────────────────────────────────────────────── */
 
 .cartAction {
   padding: 0 1rem 1rem;
+
   display: flex;
   flex-direction: column;
+
   gap: 0.375rem;
 }
 
 .addToCartBtn {
   width: 100%;
+
+  padding: 0.55rem 0.75rem;
+
+  border: none;
+  border-radius: 6px;
+
   background: #3b82d4;
   color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 0.5rem 0.75rem;
+
   font-size: 0.82rem;
   font-weight: 600;
+
   cursor: pointer;
-  transition: background 0.15s;
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
 }
 
 .addToCartBtn:hover:not(:disabled) {
   background: #2563b8;
 }
 
+.addToCartBtn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
 .addToCartBtn:disabled {
-  background: #93c5fd;
+  background: #c7d8ed;
+  color: #64748b;
+
   cursor: not-allowed;
-  opacity: 0.7;
+
+  opacity: 0.8;
 }
 
 .addToCartError {
-  font-size: 0.72rem;
-  color: #dc2626;
   margin: 0;
+
+  padding: 0.375rem 0.5rem;
+
+  border-radius: 4px;
+
+  background: #fef2f2;
+
+  color: #dc2626;
+
+  font-size: 0.72rem;
   line-height: 1.4;
+}
+
+/* ── Responsive adjustments ──────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .body {
+    padding: 0.8rem;
+  }
+
+  .cartAction {
+    padding:
+      0
+      0.8rem
+      0.8rem;
+  }
+
+  .title {
+    font-size: 0.9rem;
+  }
+
+  .price {
+    font-size: 1rem;
+  }
+
+  .imagePlaceholder {
+    min-height: 180px;
+  }
 }
