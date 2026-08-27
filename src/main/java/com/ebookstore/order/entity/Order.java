@@ -20,7 +20,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -82,10 +82,10 @@ public class Order extends BaseEntity {
     private BigDecimal totalAmount;
 
     @Column(name = "placed_at")
-    private LocalDateTime placedAt;
+    private OffsetDateTime placedAt;
 
     @Column(name = "cancellation_deadline")
-    private LocalDateTime cancellationDeadline;
+    private OffsetDateTime cancellationDeadline;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items = new ArrayList<>();
@@ -143,11 +143,11 @@ public class Order extends BaseEntity {
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 
-    public LocalDateTime getPlacedAt() { return placedAt; }
-    public void setPlacedAt(LocalDateTime placedAt) { this.placedAt = placedAt; }
+    public OffsetDateTime getPlacedAt() { return placedAt; }
+    public void setPlacedAt(OffsetDateTime placedAt) { this.placedAt = placedAt; }
 
-    public LocalDateTime getCancellationDeadline() { return cancellationDeadline; }
-    public void setCancellationDeadline(LocalDateTime cancellationDeadline) { this.cancellationDeadline = cancellationDeadline; }
+    public OffsetDateTime getCancellationDeadline() { return cancellationDeadline; }
+    public void setCancellationDeadline(OffsetDateTime cancellationDeadline) { this.cancellationDeadline = cancellationDeadline; }
 
     public List<OrderItem> getItems() { return items; }
     public void setItems(List<OrderItem> items) { this.items = items; }

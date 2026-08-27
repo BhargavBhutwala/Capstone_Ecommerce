@@ -3,7 +3,7 @@ package com.ebookstore.order.dto;
 import com.ebookstore.common.domain.OrderStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
@@ -26,8 +26,8 @@ public class OrderResponse {
     private final BigDecimal shippingAmount;
     private final BigDecimal discountAmount;
     private final BigDecimal totalAmount;
-    private final LocalDateTime placedAt;
-    private final LocalDateTime cancellationDeadline;
+    private final OffsetDateTime placedAt;
+    private final OffsetDateTime cancellationDeadline;
 
     public OrderResponse(Long id,
                          String orderNumber,
@@ -38,8 +38,8 @@ public class OrderResponse {
                          BigDecimal shippingAmount,
                          BigDecimal discountAmount,
                          BigDecimal totalAmount,
-                         LocalDateTime placedAt,
-                         LocalDateTime cancellationDeadline) {
+                         OffsetDateTime placedAt,
+                         OffsetDateTime cancellationDeadline) {
         this.id = id;
         this.orderNumber = orderNumber;
         this.status = status;
@@ -62,6 +62,6 @@ public class OrderResponse {
     public BigDecimal getShippingAmount()             { return shippingAmount; }
     public BigDecimal getDiscountAmount()             { return discountAmount; }
     public BigDecimal getTotalAmount()                { return totalAmount; }
-    public LocalDateTime getPlacedAt()                { return placedAt; }
-    public LocalDateTime getCancellationDeadline()    { return cancellationDeadline; }
+    public OffsetDateTime getPlacedAt()               { return placedAt; }
+    public OffsetDateTime getCancellationDeadline()   { return cancellationDeadline; }
 }

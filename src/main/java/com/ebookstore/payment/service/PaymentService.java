@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -129,7 +129,7 @@ public class PaymentService {
         PaymentStatus outcome = paymentProcessor.process(payment);
 
         // 8 & 9. Update payment and order based on outcome
-        LocalDateTime now = LocalDateTime.now(clock);
+        OffsetDateTime now = OffsetDateTime.now(clock);
         payment.setStatus(outcome);
 
         if (outcome == PaymentStatus.SUCCESS) {

@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -182,8 +182,8 @@ public class OrderService {
         // 8. Snapshot shipping address (7 flat fields — no FK to addresses)
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
-        LocalDateTime now = LocalDateTime.now(clock);
-        LocalDateTime cancellationDeadline = now.plusHours(48);
+        OffsetDateTime now = OffsetDateTime.now(clock);
+        OffsetDateTime cancellationDeadline = now.plusHours(48);
 
         Order order = new Order();
         order.setOrderNumber(orderNumber);
@@ -400,7 +400,7 @@ public class OrderService {
         }
 
         // Deadline check: now <= cancellationDeadline (inclusive)
-        LocalDateTime now = LocalDateTime.now(clock);
+        OffsetDateTime now = OffsetDateTime.now(clock);
         if (now.isAfter(order.getCancellationDeadline())) {
             throw new OrderCancellationNotAllowedException(
                     "Cancellation deadline has passed for order " + order.getOrderNumber());

@@ -45,7 +45,7 @@ import org.springframework.data.domain.Sort;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -389,8 +389,8 @@ class OrderServiceTest {
 
         OrderResponse response = orderService.createOrder(USER_ID, new CreateOrderRequest() {{ setAddressId(ADDRESS_ID); }});
 
-        // With fixed clock at 2024-01-15T10:00:00Z
-        LocalDateTime expectedPlacedAt = LocalDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC);
+        // With fixed clock at 2024-01-15T10:00:00Z (UTC)
+        OffsetDateTime expectedPlacedAt = OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC);
         assertThat(response.getPlacedAt()).isEqualTo(expectedPlacedAt);
         assertThat(response.getCancellationDeadline()).isEqualTo(expectedPlacedAt.plusHours(48));
     }
@@ -467,9 +467,9 @@ class OrderServiceTest {
     @Test
     void listOrders_returnsPagedResponse_sortedByPlacedAtDesc() {
         Order o1 = buildOrder(ORDER_ID, OrderStatus.PENDING_PAYMENT,
-                LocalDateTime.now(clock).minusHours(2));
+                OffsetDateTime.now(clock).minusHours(2));
         Order o2 = buildOrder(ORDER_ID + 1, OrderStatus.PAID,
-                LocalDateTime.now(clock).minusHours(1));
+                OffsetDateTime.now(clock).minusHours(1));
 
         PageImpl<Order> page = new PageImpl<>(List.of(o2, o1));
         when(orderRepository.findByUserId(eq(USER_ID), any(Pageable.class))).thenReturn(page);
@@ -504,7 +504,7 @@ class OrderServiceTest {
 
     @Test
     void getOrder_ownOrder_returnsOrderResponse() {
-        Order order = buildOrder(ORDER_ID, OrderStatus.PENDING_PAYMENT, LocalDateTime.now(clock));
+        Order order = buildOrder(ORDER_ID, OrderStatus.PENDING_PAYMENT, OffsetDateTime.now(clock));
         when(orderRepository.findByIdAndUserId(ORDER_ID, USER_ID)).thenReturn(Optional.of(order));
 
         OrderResponse response = orderService.getOrder(USER_ID, ORDER_ID);
@@ -662,7 +662,7 @@ class OrderServiceTest {
     void cancelOrder_exactlyAtDeadline_isAllowed() {
         // Deadline = fixed clock time (now == deadline → allowed)
         Product product = buildProduct(PRODUCT_ID, "Book", new BigDecimal("10.00"), 5);
-        LocalDateTime deadline = LocalDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC);
+        OffsetDateTime deadline = OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC);
         Order order = buildCancellableOrderWithDeadline(ORDER_ID, OrderStatus.PENDING_PAYMENT, product, 1, deadline);
 
         when(orderRepository.findByIdAndUserId(ORDER_ID, USER_ID)).thenReturn(Optional.of(order));
@@ -678,7 +678,7 @@ class OrderServiceTest {
     void cancelOrder_afterDeadline_throwsOrderCancellationNotAllowedException() {
         // Deadline is 1 second before now (clock is fixed at FIXED_INSTANT)
         Product product = buildProduct(PRODUCT_ID, "Book", new BigDecimal("10.00"), 5);
-        LocalDateTime deadlinePast = LocalDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).minusSeconds(1);
+        OffsetDateTime deadlinePast = OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).minusSeconds(1);
         Order order = buildCancellableOrderWithDeadline(ORDER_ID, OrderStatus.PENDING_PAYMENT, product, 1, deadlinePast);
 
         when(orderRepository.findByIdAndUserId(ORDER_ID, USER_ID)).thenReturn(Optional.of(order));
@@ -692,7 +692,7 @@ class OrderServiceTest {
 
     @Test
     void cancelOrder_confirmedStatus_throwsOrderCancellationNotAllowedException() {
-        LocalDateTime futureDeadline = LocalDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).plusHours(47);
+        OffsetDateTime futureDeadline = OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).plusHours(47);
         Order order = buildCancellableOrderNoItems(ORDER_ID, OrderStatus.CONFIRMED, futureDeadline);
 
         when(orderRepository.findByIdAndUserId(ORDER_ID, USER_ID)).thenReturn(Optional.of(order));
@@ -798,7 +798,7 @@ class OrderServiceTest {
         return cart;
     }
 
-    private Order buildOrder(Long id, OrderStatus status, LocalDateTime placedAt) {
+    private Order buildOrder(Long id, OrderStatus status, OffsetDateTime placedAt) {
         Order o = new Order();
         o.setId(id);
         o.setOrderNumber("ORD-TEST" + id);
@@ -821,7 +821,7 @@ class OrderServiceTest {
     }
 
     private Order buildOrderWithItems(Long id, Product product, int qty, BigDecimal historicalPrice) {
-        Order order = buildOrder(id, OrderStatus.PAID, LocalDateTime.now(clock).minusHours(1));
+        Order order = buildOrder(id, OrderStatus.PAID, OffsetDateTime.now(clock).minusHours(1));
         OrderItem oi = new OrderItem();
         oi.setId(1L);
         oi.setOrder(order);
@@ -835,7 +835,7 @@ class OrderServiceTest {
     }
 
     private Order buildOrderWithTwoItems(Long id, Product p1, Product p2) {
-        Order order = buildOrder(id, OrderStatus.PAID, LocalDateTime.now(clock).minusHours(1));
+        Order order = buildOrder(id, OrderStatus.PAID, OffsetDateTime.now(clock).minusHours(1));
         OrderItem oi1 = new OrderItem();
         oi1.setId(1L); oi1.setOrder(order); oi1.setProduct(p1); oi1.setProductTitle(p1.getTitle());
         oi1.setQuantity(1); oi1.setUnitPrice(p1.getPrice());
@@ -849,13 +849,13 @@ class OrderServiceTest {
     }
 
     private Order buildCancellableOrder(Long id, OrderStatus status, Product product, int qty) {
-        LocalDateTime deadline = LocalDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).plusHours(1);
+        OffsetDateTime deadline = OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).plusHours(1);
         return buildCancellableOrderWithDeadline(id, status, product, qty, deadline);
     }
 
     private Order buildCancellableOrderWithDeadline(Long id, OrderStatus status, Product product,
-                                                     int qty, LocalDateTime deadline) {
-        Order order = buildOrder(id, status, LocalDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).minusHours(1));
+                                                     int qty, OffsetDateTime deadline) {
+        Order order = buildOrder(id, status, OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).minusHours(1));
         order.setCancellationDeadline(deadline);
         OrderItem oi = new OrderItem();
         oi.setId(1L);
@@ -869,17 +869,17 @@ class OrderServiceTest {
         return order;
     }
 
-    private Order buildCancellableOrderNoItems(Long id, OrderStatus status, LocalDateTime deadline) {
-        Order order = buildOrder(id, status, LocalDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).minusHours(1));
+    private Order buildCancellableOrderNoItems(Long id, OrderStatus status, OffsetDateTime deadline) {
+        Order order = buildOrder(id, status, OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).minusHours(1));
         order.setCancellationDeadline(deadline);
         order.setItems(new ArrayList<>());
         return order;
     }
 
     private Order buildCancellableOrderTwoItems(Long id, Product p1, int q1, Product p2, int q2) {
-        LocalDateTime deadline = LocalDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).plusHours(1);
+        OffsetDateTime deadline = OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).plusHours(1);
         Order order = buildOrder(id, OrderStatus.PENDING_PAYMENT,
-                LocalDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).minusHours(1));
+                OffsetDateTime.ofInstant(FIXED_INSTANT, ZoneOffset.UTC).minusHours(1));
         order.setCancellationDeadline(deadline);
         OrderItem oi1 = new OrderItem();
         oi1.setId(1L); oi1.setOrder(order); oi1.setProduct(p1); oi1.setProductTitle(p1.getTitle());

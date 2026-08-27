@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +57,7 @@ class PaymentServiceTest {
     private static final long ORDER_ID = 10L;
     private static final long PAYMENT_ID = 100L;
     private static final BigDecimal ORDER_TOTAL = new BigDecimal("49.99");
-    private static final LocalDateTime FIXED_NOW = LocalDateTime.of(2024, 6, 15, 12, 0, 0);
+    private static final OffsetDateTime FIXED_NOW = OffsetDateTime.of(2024, 6, 15, 12, 0, 0, 0, ZoneOffset.UTC);
 
     @BeforeEach
     void setUp() {

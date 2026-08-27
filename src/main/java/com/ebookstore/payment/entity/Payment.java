@@ -17,7 +17,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 @Entity
@@ -47,7 +47,7 @@ public class Payment extends BaseEntity {
     private PaymentStatus status;
 
     @Column(name = "paid_at")
-    private LocalDateTime paidAt;
+    private OffsetDateTime paidAt;
 
     public Payment() {}
 
@@ -69,8 +69,8 @@ public class Payment extends BaseEntity {
     public PaymentStatus getStatus() { return status; }
     public void setStatus(PaymentStatus status) { this.status = status; }
 
-    public LocalDateTime getPaidAt() { return paidAt; }
-    public void setPaidAt(LocalDateTime paidAt) { this.paidAt = paidAt; }
+    public OffsetDateTime getPaidAt() { return paidAt; }
+    public void setPaidAt(OffsetDateTime paidAt) { this.paidAt = paidAt; }
 
     @Override
     public boolean equals(Object o) {

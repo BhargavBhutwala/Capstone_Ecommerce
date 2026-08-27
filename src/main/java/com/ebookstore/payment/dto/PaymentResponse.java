@@ -5,7 +5,7 @@ import com.ebookstore.common.domain.PaymentStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * Response DTO for payment endpoints.
@@ -26,13 +26,13 @@ public class PaymentResponse {
     private PaymentMethod paymentMethod;
     private BigDecimal amount;
     private PaymentStatus status;
-    private LocalDateTime paidAt;
+    private OffsetDateTime paidAt;
 
     public PaymentResponse() {}
 
     public PaymentResponse(Long id, Long orderId, String paymentReference,
                            PaymentMethod paymentMethod, BigDecimal amount,
-                           PaymentStatus status, LocalDateTime paidAt) {
+                           PaymentStatus status, OffsetDateTime paidAt) {
         this.id = id;
         this.orderId = orderId;
         this.paymentReference = paymentReference;
@@ -60,6 +60,6 @@ public class PaymentResponse {
     public PaymentStatus getStatus() { return status; }
     public void setStatus(PaymentStatus status) { this.status = status; }
 
-    public LocalDateTime getPaidAt() { return paidAt; }
-    public void setPaidAt(LocalDateTime paidAt) { this.paidAt = paidAt; }
+    public OffsetDateTime getPaidAt() { return paidAt; }
+    public void setPaidAt(OffsetDateTime paidAt) { this.paidAt = paidAt; }
 }
