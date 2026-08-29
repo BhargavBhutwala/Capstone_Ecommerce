@@ -4,6 +4,14 @@ A full-stack e-bookstore platform built as the IBM AI Specialist Capstone projec
 
 ---
 
+## 🎥 Project Demo Video
+
+A complete walkthrough of the E-Bookstore capstone project is available in the GitHub Release:
+
+[▶ Watch / Download E-Bookstore Capstone Demo](https://github.com/BhargavBhutwala/Capstone_Ecommerce/releases/tag/v1.0.0-mvp)
+
+---
+
 ## MVP Features
 
 | Domain | Capability |
